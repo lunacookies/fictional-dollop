@@ -1,6 +1,2 @@
-[package]
-edition = "2021"
-name = "fictional-dollop"
-version = "0.1.0"
-
-[dependencies]
+[workspace]
+members = ["crates/*"]
