@@ -28,15 +28,31 @@ pub struct Token {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SyntaxKind {
+	StructKw,
 	Ident,
+	LBrace,
+	RBrace,
+	Comma,
 	Whitespace,
 	Error,
 }
 
 #[derive(Logos)]
 enum LogosSyntaxKind {
+	#[token("struct")]
+	StructKw,
+
 	#[regex("[a-z][a-z0-9]*")]
 	Ident,
+
+	#[token("{")]
+	LBrace,
+
+	#[token("}")]
+	RBrace,
+
+	#[token(",")]
+	Comma,
 
 	#[regex("[ \t\n]+")]
 	Whitespace,
