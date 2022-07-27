@@ -5,7 +5,7 @@ use text_size::TextRange;
 pub fn lex(input: &str) -> Vec<Token> {
 	assert!(input.len() < u32::MAX as usize);
 
-	let mut lexer = LogosSyntaxKind::lexer(input);
+	let mut lexer = LogosTokenKind::lexer(input);
 	let mut tokens = Vec::new();
 
 	while let Some(kind) = lexer.next() {
@@ -22,12 +22,12 @@ pub fn lex(input: &str) -> Vec<Token> {
 }
 
 pub struct Token {
-	pub kind: SyntaxKind,
+	pub kind: TokenKind,
 	pub range: TextRange,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum SyntaxKind {
+pub enum TokenKind {
 	StructKw,
 	Ident,
 	LBrace,
@@ -38,7 +38,7 @@ pub enum SyntaxKind {
 }
 
 #[derive(Logos)]
-enum LogosSyntaxKind {
+enum LogosTokenKind {
 	#[token("struct")]
 	StructKw,
 
