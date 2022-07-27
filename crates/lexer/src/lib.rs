@@ -1,5 +1,6 @@
 use logos::Logos;
 use std::{fmt, mem};
+use syntax::TokenKind;
 use text_size::TextRange;
 
 pub fn lex(input: &str) -> Vec<Token> {
@@ -24,17 +25,6 @@ pub fn lex(input: &str) -> Vec<Token> {
 pub struct Token {
 	pub kind: TokenKind,
 	pub range: TextRange,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum TokenKind {
-	StructKw,
-	Ident,
-	LBrace,
-	RBrace,
-	Comma,
-	Whitespace,
-	Error,
 }
 
 #[derive(Logos)]

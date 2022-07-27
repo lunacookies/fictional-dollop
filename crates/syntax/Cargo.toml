@@ -1,0 +1,7 @@
+[package]
+edition = "2021"
+name = "syntax"
+version = "0.0.0"
+
+[dependencies]
+eventree = "0.6.2"

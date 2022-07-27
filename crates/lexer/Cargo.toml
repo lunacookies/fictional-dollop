@@ -6,4 +6,5 @@ version = "0.0.0"
 [dependencies]
 expect-test = "1.4.0"
 logos = "0.12.1"
+syntax = {path = "../syntax"}
 text-size = "1.1.0"
