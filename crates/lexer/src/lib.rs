@@ -22,6 +22,7 @@ pub fn lex(input: &str) -> Vec<Token> {
 	tokens
 }
 
+#[derive(Clone, Copy)]
 pub struct Token {
 	pub kind: TokenKind,
 	pub range: TextRange,
