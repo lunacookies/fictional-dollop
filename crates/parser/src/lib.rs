@@ -2,7 +2,7 @@ mod grammar;
 
 use lexer::Token;
 use std::fmt;
-use syntax::{NodeKind, SyntaxBuilder, SyntaxTree};
+use syntax::{NodeKind, SyntaxBuilder, SyntaxTree, TokenKind};
 use text_size::TextRange;
 
 pub fn parse(input: &str) -> Parse {
@@ -52,23 +52,40 @@ enum Event {
 fn process_events(
 	input: &str,
 	events: &[Event],
-	mut tokens: &[Token],
+	tokens: &[Token],
 ) -> SyntaxTree {
-	let mut builder = SyntaxBuilder::new(input);
+	Sink { builder: SyntaxBuilder::new(input), tokens }.process_events(events)
+}
 
-	for event in events {
-		match *event {
-			Event::StartNode(kind) => builder.start_node(kind),
-			Event::AddToken => {
-				let token = tokens[0];
-				builder.add_token(token.kind, token.range);
-				tokens = &tokens[1..];
+struct Sink<'a> {
+	builder: SyntaxBuilder,
+	tokens: &'a [Token],
+}
+
+impl Sink<'_> {
+	fn process_events(mut self, events: &[Event]) -> SyntaxTree {
+		for event in events {
+			match *event {
+				Event::StartNode(kind) => self.builder.start_node(kind),
+				Event::AddToken => self.add_token(),
+				Event::FinishNode => self.builder.finish_node(),
 			}
-			Event::FinishNode => builder.finish_node(),
+
+			if !self.tokens.is_empty()
+				&& self.tokens[0].kind == TokenKind::Whitespace
+			{
+				self.add_token();
+			}
 		}
+
+		self.builder.finish()
 	}
 
-	builder.finish()
+	fn add_token(&mut self) {
+		let token = self.tokens[0];
+		self.builder.add_token(token.kind, token.range);
+		self.tokens = &self.tokens[1..];
+	}
 }
 
 impl fmt::Debug for Parse {
