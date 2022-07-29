@@ -5,13 +5,13 @@ pub(crate) fn source_file(p: &mut Parser) {
 	p.start_node(NodeKind::SourceFile);
 
 	while !p.eof() {
-		item(p);
+		opt_item(p);
 	}
 
 	p.finish_node();
 }
 
-fn item(p: &mut Parser) {
+fn opt_item(p: &mut Parser) {
 	match p.peek() {
 		Some(TokenKind::StructKw) => strukt(p),
 		Some(_) => p.error_without_recovery("item"),
@@ -28,7 +28,7 @@ fn strukt(p: &mut Parser) {
 	while !p.at_recovery() && !p.at(TokenKind::RBrace) {
 		p.start_node(NodeKind::Field);
 		p.expect_with_name(TokenKind::Ident, "field name");
-		p.expect_with_name(TokenKind::Ident, "type");
+		opt_ty(p);
 		p.finish_node();
 
 		if p.at(TokenKind::Comma) {
@@ -37,5 +37,16 @@ fn strukt(p: &mut Parser) {
 	}
 
 	p.expect(TokenKind::RBrace);
+	p.finish_node();
+}
+
+fn opt_ty(p: &mut Parser) {
+	if !p.at(TokenKind::Ident) {
+		p.error("type");
+		return;
+	}
+
+	p.start_node(NodeKind::Ty);
+	p.bump(TokenKind::Ident);
 	p.finish_node();
 }
