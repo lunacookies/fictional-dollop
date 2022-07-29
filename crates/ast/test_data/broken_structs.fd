@@ -1,0 +1,18 @@
+struct {}
+struct missingfieldty { a, b c }
+struct brokenfieldty { a ?, b c }
+struct brokenfieldname { ? foo, blah bar }
+# ---
+# struct brokenfieldname {
+# 	blah bar,
+# }
+#
+# struct brokenfieldty {
+# 	a <missing>,
+# 	b c,
+# }
+#
+# struct missingfieldty {
+# 	a <missing>,
+# 	b c,
+# }

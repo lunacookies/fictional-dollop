@@ -1,0 +1,11 @@
+[package]
+edition = "2021"
+name = "ast"
+version = "0.0.0"
+
+[dependencies]
+syntax = {path = "../syntax"}
+
+[dev-dependencies]
+expect-test = "1.4.0"
+parser = {path = "../parser"}

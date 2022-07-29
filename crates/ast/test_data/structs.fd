@@ -1,0 +1,17 @@
+struct b {}
+struct a {
+	foo bar,
+	baz quux,
+}
+struct c { inner b }
+# ---
+# struct a {
+# 	foo bar,
+# 	baz quux,
+# }
+#
+# struct b {}
+#
+# struct c {
+# 	inner b,
+# }
