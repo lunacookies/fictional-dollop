@@ -41,12 +41,7 @@ fn strukt(p: &mut Parser) {
 }
 
 fn opt_ty(p: &mut Parser) {
-	if !p.at(TokenKind::Ident) {
-		p.error("type");
-		return;
-	}
-
 	p.start_node(NodeKind::Ty);
-	p.bump(TokenKind::Ident);
+	p.expect_with_name(TokenKind::Ident, "type");
 	p.finish_node();
 }
