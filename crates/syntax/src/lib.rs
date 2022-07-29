@@ -10,6 +10,9 @@ pub type SyntaxElement = eventree::SyntaxElement<TreeConfig>;
 #[repr(u8)]
 pub enum NodeKind {
 	SourceFile,
+	Strukt,
+	Field,
+	Error,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

@@ -1,0 +1,77 @@
+struct {}
+struct missingclose {
+struct missingopen }
+struct missingcomma { a b c d }
+struct missingtypes { a, b }
+struct unclosedateof {
+# ---
+# SourceFile@0..137
+#   Strukt@0..10
+#     StructKw@0..6 "struct"
+#     Whitespace@6..7 " "
+#     LBrace@7..8 "{"
+#     RBrace@8..9 "}"
+#     Whitespace@9..10 "\n"
+#   Strukt@10..32
+#     StructKw@10..16 "struct"
+#     Whitespace@16..17 " "
+#     Ident@17..29 "missingclose"
+#     Whitespace@29..30 " "
+#     LBrace@30..31 "{"
+#     Whitespace@31..32 "\n"
+#   Strukt@32..53
+#     StructKw@32..38 "struct"
+#     Whitespace@38..39 " "
+#     Ident@39..50 "missingopen"
+#     Whitespace@50..51 " "
+#     RBrace@51..52 "}"
+#     Whitespace@52..53 "\n"
+#   Strukt@53..85
+#     StructKw@53..59 "struct"
+#     Whitespace@59..60 " "
+#     Ident@60..72 "missingcomma"
+#     Whitespace@72..73 " "
+#     LBrace@73..74 "{"
+#     Whitespace@74..75 " "
+#     Field@75..79
+#       Ident@75..76 "a"
+#       Whitespace@76..77 " "
+#       Ident@77..78 "b"
+#       Whitespace@78..79 " "
+#     Field@79..83
+#       Ident@79..80 "c"
+#       Whitespace@80..81 " "
+#       Ident@81..82 "d"
+#       Whitespace@82..83 " "
+#     RBrace@83..84 "}"
+#     Whitespace@84..85 "\n"
+#   Strukt@85..114
+#     StructKw@85..91 "struct"
+#     Whitespace@91..92 " "
+#     Ident@92..104 "missingtypes"
+#     Whitespace@104..105 " "
+#     LBrace@105..106 "{"
+#     Whitespace@106..107 " "
+#     Field@107..110
+#       Ident@107..108 "a"
+#       Error@108..110
+#         Comma@108..109 ","
+#         Whitespace@109..110 " "
+#     Field@110..112
+#       Ident@110..111 "b"
+#       Whitespace@111..112 " "
+#     RBrace@112..113 "}"
+#     Whitespace@113..114 "\n"
+#   Strukt@114..137
+#     StructKw@114..120 "struct"
+#     Whitespace@120..121 " "
+#     Ident@121..134 "unclosedateof"
+#     Whitespace@134..135 " "
+#     LBrace@135..136 "{"
+#     Whitespace@136..137 "\n"
+# error at 6: missing struct name
+# error at 31: missing RBrace
+# error at 50: missing LBrace
+# error at 108..109: expected type
+# error at 111: missing type
+# error at 136: missing RBrace

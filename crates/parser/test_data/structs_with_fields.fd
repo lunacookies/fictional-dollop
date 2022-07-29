@@ -1,0 +1,76 @@
+struct a { foo bar }
+struct b { foo bar, }
+struct c { foo bar, baz quux }
+struct d { foo bar, baz quux, }
+# ---
+# SourceFile@0..106
+#   Strukt@0..21
+#     StructKw@0..6 "struct"
+#     Whitespace@6..7 " "
+#     Ident@7..8 "a"
+#     Whitespace@8..9 " "
+#     LBrace@9..10 "{"
+#     Whitespace@10..11 " "
+#     Field@11..19
+#       Ident@11..14 "foo"
+#       Whitespace@14..15 " "
+#       Ident@15..18 "bar"
+#       Whitespace@18..19 " "
+#     RBrace@19..20 "}"
+#     Whitespace@20..21 "\n"
+#   Strukt@21..43
+#     StructKw@21..27 "struct"
+#     Whitespace@27..28 " "
+#     Ident@28..29 "b"
+#     Whitespace@29..30 " "
+#     LBrace@30..31 "{"
+#     Whitespace@31..32 " "
+#     Field@32..39
+#       Ident@32..35 "foo"
+#       Whitespace@35..36 " "
+#       Ident@36..39 "bar"
+#     Comma@39..40 ","
+#     Whitespace@40..41 " "
+#     RBrace@41..42 "}"
+#     Whitespace@42..43 "\n"
+#   Strukt@43..74
+#     StructKw@43..49 "struct"
+#     Whitespace@49..50 " "
+#     Ident@50..51 "c"
+#     Whitespace@51..52 " "
+#     LBrace@52..53 "{"
+#     Whitespace@53..54 " "
+#     Field@54..61
+#       Ident@54..57 "foo"
+#       Whitespace@57..58 " "
+#       Ident@58..61 "bar"
+#     Comma@61..62 ","
+#     Whitespace@62..63 " "
+#     Field@63..72
+#       Ident@63..66 "baz"
+#       Whitespace@66..67 " "
+#       Ident@67..71 "quux"
+#       Whitespace@71..72 " "
+#     RBrace@72..73 "}"
+#     Whitespace@73..74 "\n"
+#   Strukt@74..106
+#     StructKw@74..80 "struct"
+#     Whitespace@80..81 " "
+#     Ident@81..82 "d"
+#     Whitespace@82..83 " "
+#     LBrace@83..84 "{"
+#     Whitespace@84..85 " "
+#     Field@85..92
+#       Ident@85..88 "foo"
+#       Whitespace@88..89 " "
+#       Ident@89..92 "bar"
+#     Comma@92..93 ","
+#     Whitespace@93..94 " "
+#     Field@94..102
+#       Ident@94..97 "baz"
+#       Whitespace@97..98 " "
+#       Ident@98..102 "quux"
+#     Comma@102..103 ","
+#     Whitespace@103..104 " "
+#     RBrace@104..105 "}"
+#     Whitespace@105..106 "\n"

@@ -1,0 +1,12 @@
+foo
+bar
+# ---
+# SourceFile@0..8
+#   Error@0..4
+#     Ident@0..3 "foo"
+#     Whitespace@3..4 "\n"
+#   Error@4..8
+#     Ident@4..7 "bar"
+#     Whitespace@7..8 "\n"
+# error at 0..3: expected item
+# error at 4..7: expected item
