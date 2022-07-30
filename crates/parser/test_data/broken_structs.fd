@@ -91,9 +91,9 @@ struct unclosedateof {
 #     LBrace@161..162 "{"
 #     Whitespace@162..163 "\n"
 # error at 6: missing struct name
-# error at 31: missing RBrace
-# error at 50: missing LBrace
+# error at 31: missing `}`
+# error at 50: missing `{`
 # error at 108..109: expected type
 # error at 111: missing type
 # error at 136..137: expected type
-# error at 162: missing RBrace
+# error at 162: missing `}`
