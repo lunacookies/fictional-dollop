@@ -18,7 +18,7 @@ impl fmt::Display for Ty {
 	}
 }
 
-pub fn gen_ty(node: SyntaxNode, tree: &SyntaxTree) -> Ty {
+fn gen_ty(node: SyntaxNode, tree: &SyntaxTree) -> Ty {
 	let name = match node
 		.child_tokens(tree)
 		.find(|t| t.kind(tree) == TokenKind::Ident)

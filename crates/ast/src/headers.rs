@@ -20,20 +20,14 @@ pub fn gen_header(tree: &SyntaxTree) -> HashMap<String, Item> {
 	items
 }
 
-pub fn gen_item(
-	node: SyntaxNode,
-	tree: &SyntaxTree,
-) -> Option<(String, Item)> {
+fn gen_item(node: SyntaxNode, tree: &SyntaxTree) -> Option<(String, Item)> {
 	match node.kind(tree) {
 		NodeKind::Strukt => gen_strukt(node, tree),
 		_ => None,
 	}
 }
 
-pub fn gen_strukt(
-	node: SyntaxNode,
-	tree: &SyntaxTree,
-) -> Option<(String, Item)> {
+fn gen_strukt(node: SyntaxNode, tree: &SyntaxTree) -> Option<(String, Item)> {
 	let name = node
 		.child_tokens(tree)
 		.find(|t| t.kind(tree) == TokenKind::Ident)
