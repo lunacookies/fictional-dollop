@@ -1,4 +1,4 @@
-use std::mem;
+use std::{fmt, mem};
 
 pub type SyntaxTree = eventree::SyntaxTree<TreeConfig>;
 pub type SyntaxBuilder = eventree::SyntaxBuilder<TreeConfig>;
@@ -54,4 +54,19 @@ unsafe impl eventree::SyntaxKind for TokenKind {
 impl eventree::TreeConfig for TreeConfig {
 	type NodeKind = NodeKind;
 	type TokenKind = TokenKind;
+}
+
+impl fmt::Display for TokenKind {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		let s = match self {
+			TokenKind::StructKw => "`struct`",
+			TokenKind::Ident => "identifier",
+			TokenKind::LBrace => "`{`",
+			TokenKind::RBrace => "`}`",
+			TokenKind::Comma => "`,`",
+			TokenKind::Whitespace => "whitespace",
+			TokenKind::Error => "unrecognized token",
+		};
+		write!(f, "{s}")
+	}
 }

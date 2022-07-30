@@ -44,7 +44,7 @@ impl Parser {
 	}
 
 	fn expect(&mut self, kind: TokenKind) {
-		self.expect_with_name(kind, &format!("{kind:?}"));
+		self.expect_with_name(kind, &format!("{kind}"));
 	}
 
 	fn expect_with_name(&mut self, kind: TokenKind, name: &str) {
