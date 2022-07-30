@@ -3,11 +3,15 @@ use std::collections::HashMap;
 use std::fmt::Write;
 use syntax::{NodeKind, SyntaxNode, SyntaxTree, TokenKind};
 
+pub struct Header {
+	pub items: HashMap<String, Item>,
+}
+
 pub enum Item {
 	Strukt { fields: Vec<(String, Ty)> },
 }
 
-pub fn gen_header(tree: &SyntaxTree) -> HashMap<String, Item> {
+pub fn gen_header(tree: &SyntaxTree) -> Header {
 	let root = tree.root();
 	let mut items = HashMap::new();
 
@@ -17,7 +21,7 @@ pub fn gen_header(tree: &SyntaxTree) -> HashMap<String, Item> {
 		}
 	}
 
-	items
+	Header { items }
 }
 
 fn gen_item(node: SyntaxNode, tree: &SyntaxTree) -> Option<(String, Item)> {
@@ -62,10 +66,10 @@ fn gen_strukt(node: SyntaxNode, tree: &SyntaxTree) -> Option<(String, Item)> {
 	Some((name.to_string(), Item::Strukt { fields }))
 }
 
-pub fn pretty_print_header(header: &HashMap<String, Item>) -> String {
+pub fn pretty_print_header(header: &Header) -> String {
 	let mut s = String::new();
 
-	let mut header: Vec<_> = header.iter().collect();
+	let mut header: Vec<_> = header.items.iter().collect();
 	header.sort_by_key(|(name, _)| *name);
 
 	for (i, (name, item)) in header.into_iter().enumerate() {
