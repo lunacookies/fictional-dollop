@@ -7,5 +7,5 @@ version = "0.0.0"
 syntax = {path = "../syntax"}
 
 [dev-dependencies]
-expect-test = "1.4.0"
 parser = {path = "../parser"}
+test_utils = {path = "../test_utils"}

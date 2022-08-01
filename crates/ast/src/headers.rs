@@ -106,32 +106,8 @@ pub fn pretty_print_header(header: &Header) -> String {
 #[cfg(test)]
 #[test]
 fn run_tests() {
-	use expect_test::expect_file;
-	use parser::parse;
-
-	for entry in std::fs::read_dir("test_data").unwrap() {
-		let test_path = entry.unwrap().path().canonicalize().unwrap();
-
-		println!(
-			"\n==== RUNNING HEADER GEN TEST {:?} ====",
-			test_path.file_stem().unwrap()
-		);
-
-		let test_text = std::fs::read_to_string(&test_path).unwrap();
-		let input = &test_text[..test_text.find("# ---\n").unwrap()];
-		let header = gen_header(&parse(input).tree);
-
-		let mut actual = input.to_string();
-		actual.push_str("# ---\n");
-		for line in pretty_print_header(&header).lines() {
-			actual.push('#');
-			if !line.is_empty() {
-				actual.push(' ');
-			}
-			actual.push_str(line);
-			actual.push('\n');
-		}
-
-		expect_file![test_path].assert_eq(&actual);
-	}
+	test_utils::run_tests(|input| {
+		let header = gen_header(&parser::parse(input).tree);
+		pretty_print_header(&header)
+	});
 }
