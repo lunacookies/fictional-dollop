@@ -1,11 +1,11 @@
 struct a {}
 # ---
 # SourceFile@0..12
-#   Strukt@0..12
+#   Strukt@0..11
 #     StructKw@0..6 "struct"
 #     Whitespace@6..7 " "
 #     Ident@7..8 "a"
 #     Whitespace@8..9 " "
 #     LBrace@9..10 "{"
 #     RBrace@10..11 "}"
-#     Whitespace@11..12 "\n"
+#   Whitespace@11..12 "\n"

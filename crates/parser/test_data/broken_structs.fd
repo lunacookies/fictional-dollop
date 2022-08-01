@@ -7,89 +7,89 @@ struct brokentype { a ? }
 struct unclosedateof {
 # ---
 # SourceFile@0..163
-#   Strukt@0..10
+#   Strukt@0..9
 #     StructKw@0..6 "struct"
 #     Whitespace@6..7 " "
 #     LBrace@7..8 "{"
 #     RBrace@8..9 "}"
-#     Whitespace@9..10 "\n"
-#   Strukt@10..32
+#   Whitespace@9..10 "\n"
+#   Strukt@10..31
 #     StructKw@10..16 "struct"
 #     Whitespace@16..17 " "
 #     Ident@17..29 "missingclose"
 #     Whitespace@29..30 " "
 #     LBrace@30..31 "{"
-#     Whitespace@31..32 "\n"
-#   Strukt@32..53
+#   Whitespace@31..32 "\n"
+#   Strukt@32..52
 #     StructKw@32..38 "struct"
 #     Whitespace@38..39 " "
 #     Ident@39..50 "missingopen"
 #     Whitespace@50..51 " "
 #     RBrace@51..52 "}"
-#     Whitespace@52..53 "\n"
-#   Strukt@53..85
+#   Whitespace@52..53 "\n"
+#   Strukt@53..84
 #     StructKw@53..59 "struct"
 #     Whitespace@59..60 " "
 #     Ident@60..72 "missingcomma"
 #     Whitespace@72..73 " "
 #     LBrace@73..74 "{"
 #     Whitespace@74..75 " "
-#     Field@75..79
+#     Field@75..78
 #       Ident@75..76 "a"
 #       Whitespace@76..77 " "
-#       Ty@77..79
+#       Ty@77..78
 #         Ident@77..78 "b"
-#         Whitespace@78..79 " "
-#     Field@79..83
+#     Whitespace@78..79 " "
+#     Field@79..82
 #       Ident@79..80 "c"
 #       Whitespace@80..81 " "
-#       Ty@81..83
+#       Ty@81..82
 #         Ident@81..82 "d"
-#         Whitespace@82..83 " "
+#     Whitespace@82..83 " "
 #     RBrace@83..84 "}"
-#     Whitespace@84..85 "\n"
-#   Strukt@85..114
+#   Whitespace@84..85 "\n"
+#   Strukt@85..113
 #     StructKw@85..91 "struct"
 #     Whitespace@91..92 " "
 #     Ident@92..104 "missingtypes"
 #     Whitespace@104..105 " "
 #     LBrace@105..106 "{"
 #     Whitespace@106..107 " "
-#     Field@107..110
+#     Field@107..109
 #       Ident@107..108 "a"
-#       Ty@108..110
-#         Error@108..110
+#       Ty@108..109
+#         Error@108..109
 #           Comma@108..109 ","
-#           Whitespace@109..110 " "
+#     Whitespace@109..110 " "
 #     Field@110..112
 #       Ident@110..111 "b"
 #       Whitespace@111..112 " "
 #       Ty@112..112
 #     RBrace@112..113 "}"
-#     Whitespace@113..114 "\n"
-#   Strukt@114..140
+#   Whitespace@113..114 "\n"
+#   Strukt@114..139
 #     StructKw@114..120 "struct"
 #     Whitespace@120..121 " "
 #     Ident@121..131 "brokentype"
 #     Whitespace@131..132 " "
 #     LBrace@132..133 "{"
 #     Whitespace@133..134 " "
-#     Field@134..138
+#     Field@134..137
 #       Ident@134..135 "a"
 #       Whitespace@135..136 " "
-#       Ty@136..138
-#         Error@136..138
+#       Ty@136..137
+#         Error@136..137
 #           Error@136..137 "?"
-#           Whitespace@137..138 " "
+#     Whitespace@137..138 " "
 #     RBrace@138..139 "}"
-#     Whitespace@139..140 "\n"
-#   Strukt@140..163
+#   Whitespace@139..140 "\n"
+#   Strukt@140..162
 #     StructKw@140..146 "struct"
 #     Whitespace@146..147 " "
 #     Ident@147..160 "unclosedateof"
 #     Whitespace@160..161 " "
 #     LBrace@161..162 "{"
-#     Whitespace@162..163 "\n"
+#   Whitespace@162..163 "\n"
 # error at 6: missing struct name
 # error at 31: missing `}`
 # error at 50: missing `{`

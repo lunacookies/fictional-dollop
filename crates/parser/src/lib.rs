@@ -126,7 +126,7 @@ impl Parser {
 	}
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 enum Event {
 	StartNode(NodeKind),
 	AddToken,
@@ -138,37 +138,54 @@ fn process_events(
 	events: &[Event],
 	tokens: &[Token],
 ) -> SyntaxTree {
-	Sink { builder: SyntaxBuilder::new(input), tokens }.process_events(events)
+	Sink { builder: SyntaxBuilder::new(input), tokens, cursor: 0 }
+		.process_events(events)
 }
 
 struct Sink<'a> {
 	builder: SyntaxBuilder,
 	tokens: &'a [Token],
+	cursor: usize,
 }
 
 impl Sink<'_> {
 	fn process_events(mut self, events: &[Event]) -> SyntaxTree {
-		for event in events {
-			match *event {
+		assert_eq!(events[events.len() - 1], Event::FinishNode);
+
+		for idx in 0..events.len() - 1 {
+			let event = events[idx];
+			let next = events[idx + 1];
+
+			match event {
 				Event::StartNode(kind) => self.builder.start_node(kind),
 				Event::AddToken => self.add_token(),
 				Event::FinishNode => self.builder.finish_node(),
 			}
 
-			if !self.tokens.is_empty()
-				&& self.tokens[0].kind == TokenKind::Whitespace
-			{
-				self.add_token();
+			match next {
+				Event::StartNode(_) | Event::AddToken => self.skip_trivia(),
+				Event::FinishNode => {}
 			}
 		}
+
+		self.skip_trivia();
+		self.builder.finish_node();
 
 		self.builder.finish()
 	}
 
+	fn skip_trivia(&mut self) {
+		if self.cursor < self.tokens.len()
+			&& self.tokens[self.cursor].kind == TokenKind::Whitespace
+		{
+			self.add_token();
+		}
+	}
+
 	fn add_token(&mut self) {
-		let token = self.tokens[0];
+		let token = self.tokens[self.cursor];
 		self.builder.add_token(token.kind, token.range);
-		self.tokens = &self.tokens[1..];
+		self.cursor += 1;
 	}
 }
 
@@ -201,6 +218,8 @@ impl fmt::Debug for Error {
 #[test]
 fn run_tests() {
 	use expect_test::expect_file;
+
+	let mut did_any_test_fail = false;
 
 	for entry in std::fs::read_dir("test_data").unwrap() {
 		let test_path = entry.unwrap().path().canonicalize().unwrap();
