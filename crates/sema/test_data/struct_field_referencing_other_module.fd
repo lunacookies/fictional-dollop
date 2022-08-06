@@ -1,0 +1,7 @@
+#- main
+struct foo { first a, second b, third c }
+#- letters
+struct a {}
+struct b {}
+struct c {}
+# ---

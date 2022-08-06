@@ -1,0 +1,13 @@
+[package]
+edition = "2021"
+name = "sema"
+version = "0.0.0"
+
+[dependencies]
+arena = {path = "../arena"}
+ast = {path = "../ast"}
+text-size = "1.1.0"
+
+[dev-dependencies]
+parser = {path = "../parser"}
+test_utils = {path = "../test_utils"}
