@@ -1,8 +1,12 @@
+use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::fs;
 use text_size::TextSize;
 
 fn main() -> anyhow::Result<()> {
+	let mut world = ast::World { headers: HashMap::new() };
+	let mut file_map = HashMap::new();
+
 	for entry in fs::read_dir(".")? {
 		let path = entry?.path();
 		if path.extension() != Some(OsStr::new("fd")) {
@@ -31,7 +35,29 @@ fn main() -> anyhow::Result<()> {
 			);
 		}
 
-		let _header = ast::gen_header(&parse.tree);
+		let header = ast::gen_header(&parse.tree);
+		world.headers.insert(file_name.to_string(), header);
+		file_map.insert(file_name.to_string(), (content, line_starts));
+	}
+
+	for (file_name, header) in &world.headers {
+		let (content, line_starts) = &file_map[file_name];
+		let errors = sema::nameres(header, &world);
+
+		for error in errors {
+			let message = match error.kind {
+				sema::ErrorKind::UndefinedTy => {
+					format!("undefined type `{}`", &content[error.range])
+				}
+			};
+			let (line, column) =
+				offset_to_line_column(error.range.start(), line_starts);
+			println!(
+				"{file_name}:{}:{}: error: {message}",
+				line + 1,
+				column + 1
+			);
+		}
 	}
 
 	Ok(())

@@ -36,6 +36,7 @@ dependencies = [
  "anyhow",
  "ast",
  "parser",
+ "sema",
  "text-size",
 ]
 
