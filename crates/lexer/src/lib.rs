@@ -42,6 +42,9 @@ enum LogosTokenKind {
 	#[token("}")]
 	RBrace,
 
+	#[token("*")]
+	Star,
+
 	#[token(",")]
 	Comma,
 
@@ -99,6 +102,26 @@ mod tests {
 				Ident@2..5
 				Whitespace@5..6
 				Ident@6..10"]],
+		);
+	}
+
+	#[test]
+	fn delimiters() {
+		check(
+			"{}",
+			expect![["
+				LBrace@0..1
+				RBrace@1..2"]],
+		);
+	}
+
+	#[test]
+	fn symbols() {
+		check(
+			"*,",
+			expect![["
+				Star@0..1
+				Comma@1..2"]],
 		);
 	}
 }
