@@ -4,7 +4,9 @@ name = "ast"
 version = "0.0.0"
 
 [dependencies]
+arena = {path = "../arena"}
 syntax = {path = "../syntax"}
+text-size = "1.1.0"
 
 [dev-dependencies]
 parser = {path = "../parser"}

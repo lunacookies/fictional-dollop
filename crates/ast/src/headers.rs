@@ -1,37 +1,59 @@
 use crate::{gen_ty, Ty};
+use arena::{Arena, ArenaMap, Id};
 use std::collections::HashMap;
 use std::fmt::Write;
 use syntax::{NodeKind, SyntaxNode, SyntaxTree, TokenKind};
+use text_size::TextRange;
+
+pub struct World {
+	pub headers: HashMap<String, Header>,
+}
 
 pub struct Header {
 	pub items: HashMap<String, Item>,
+	pub tys: Arena<Ty>,
+	pub ty_ranges: ArenaMap<Ty, TextRange>,
 }
 
 pub enum Item {
-	Strukt { fields: Vec<(String, Ty)> },
+	Strukt { fields: Vec<(String, Id<Ty>)> },
 }
 
 pub fn gen_header(tree: &SyntaxTree) -> Header {
 	let root = tree.root();
 	let mut items = HashMap::new();
+	let mut tys = Arena::new();
+	let mut ty_ranges = ArenaMap::new();
 
 	for child in root.child_nodes(tree) {
-		if let Some((name, item)) = gen_item(child, tree) {
+		if let Some((name, item)) =
+			gen_item(child, tree, &mut tys, &mut ty_ranges)
+		{
 			items.insert(name, item);
 		}
 	}
 
-	Header { items }
+	Header { items, tys, ty_ranges }
 }
 
-fn gen_item(node: SyntaxNode, tree: &SyntaxTree) -> Option<(String, Item)> {
+fn gen_item(
+	node: SyntaxNode,
+	tree: &SyntaxTree,
+	tys: &mut Arena<Ty>,
+	ty_ranges: &mut ArenaMap<Ty, TextRange>,
+) -> Option<(String, Item)> {
 	match node.kind(tree) {
-		NodeKind::Strukt => gen_strukt(node, tree),
+		NodeKind::Strukt => gen_strukt(node, tree, tys, ty_ranges),
 		_ => None,
 	}
 }
 
-fn gen_strukt(node: SyntaxNode, tree: &SyntaxTree) -> Option<(String, Item)> {
+fn gen_strukt(
+	node: SyntaxNode,
+	tree: &SyntaxTree,
+	tys: &mut Arena<Ty>,
+	ty_ranges: &mut ArenaMap<Ty, TextRange>,
+) -> Option<(String, Item)> {
 	let name = node
 		.child_tokens(tree)
 		.find(|t| t.kind(tree) == TokenKind::Ident)
@@ -56,11 +78,15 @@ fn gen_strukt(node: SyntaxNode, tree: &SyntaxTree) -> Option<(String, Item)> {
 			.child_nodes(tree)
 			.find(|n| n.kind(tree) == NodeKind::Ty)
 		{
-			Some(ty) => gen_ty(ty, tree),
-			None => Ty::Missing,
+			Some(ty) => {
+				let id = tys.alloc(gen_ty(ty, tree));
+				ty_ranges.insert(id, ty.range(tree));
+				id
+			}
+			None => tys.alloc(Ty::Missing),
 		};
 
-		fields.push((name.to_string(), Ty::Named(ty.to_string())));
+		fields.push((name.to_string(), ty));
 	}
 
 	Some((name.to_string(), Item::Strukt { fields }))
@@ -69,10 +95,10 @@ fn gen_strukt(node: SyntaxNode, tree: &SyntaxTree) -> Option<(String, Item)> {
 pub fn pretty_print_header(header: &Header) -> String {
 	let mut s = String::new();
 
-	let mut header: Vec<_> = header.items.iter().collect();
-	header.sort_by_key(|(name, _)| *name);
+	let mut items: Vec<_> = header.items.iter().collect();
+	items.sort_by_key(|(name, _)| *name);
 
-	for (i, (name, item)) in header.into_iter().enumerate() {
+	for (i, (name, item)) in items.into_iter().enumerate() {
 		if i != 0 {
 			s.push_str("\n\n");
 		}
@@ -91,7 +117,7 @@ pub fn pretty_print_header(header: &Header) -> String {
 						s.push_str("\n\t");
 						s.push_str(field_name);
 						s.push(' ');
-						write!(s, "{field_ty}").unwrap();
+						write!(s, "{}", header.tys.get(*field_ty)).unwrap();
 						s.push(',');
 					}
 					s.push_str("\n}");

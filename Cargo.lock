@@ -9,12 +9,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bb07d2053ccdbe10e2af2995a2f116c1330396493dc1269f6a91d0ae82e19704"
 
 [[package]]
+name = "arena"
+version = "0.0.0"
+
+[[package]]
 name = "ast"
 version = "0.0.0"
 dependencies = [
+ "arena",
  "parser",
  "syntax",
  "test_utils",
+ "text-size",
 ]
 
 [[package]]
