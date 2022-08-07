@@ -1,0 +1,8 @@
+#- main
+struct a {
+    named foo,
+    pointer *foo,
+}
+# ---
+# error in main at 21..24: undefined type
+# error in main at 39..42: undefined type

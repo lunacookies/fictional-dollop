@@ -1,0 +1,36 @@
+struct bare { f t }
+struct pointer { f *t }
+# ---
+# SourceFile@0..44
+#   Strukt@0..19
+#     StructKw@0..6 "struct"
+#     Whitespace@6..7 " "
+#     Ident@7..11 "bare"
+#     Whitespace@11..12 " "
+#     LBrace@12..13 "{"
+#     Whitespace@13..14 " "
+#     Field@14..17
+#       Ident@14..15 "f"
+#       Whitespace@15..16 " "
+#       NamedTy@16..17
+#         Ident@16..17 "t"
+#     Whitespace@17..18 " "
+#     RBrace@18..19 "}"
+#   Whitespace@19..20 "\n"
+#   Strukt@20..43
+#     StructKw@20..26 "struct"
+#     Whitespace@26..27 " "
+#     Ident@27..34 "pointer"
+#     Whitespace@34..35 " "
+#     LBrace@35..36 "{"
+#     Whitespace@36..37 " "
+#     Field@37..41
+#       Ident@37..38 "f"
+#       Whitespace@38..39 " "
+#       PointerTy@39..41
+#         Star@39..40 "*"
+#         NamedTy@40..41
+#           Ident@40..41 "t"
+#     Whitespace@41..42 " "
+#     RBrace@42..43 "}"
+#   Whitespace@43..44 "\n"

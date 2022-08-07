@@ -1,7 +1,6 @@
 use crate::{gen_ty, Ty};
 use arena::{Arena, ArenaMap, Id};
 use std::collections::HashMap;
-use std::fmt::Write;
 use syntax::{NodeKind, SyntaxNode, SyntaxTree, TokenKind};
 use text_size::TextRange;
 
@@ -74,12 +73,12 @@ fn gen_strukt(
 			None => continue,
 		};
 
-		let ty = match child
-			.child_nodes(tree)
-			.find(|n| n.kind(tree) == NodeKind::Ty)
-		{
+		let ty = match child.child_nodes(tree).find(|n| {
+			matches!(n.kind(tree), NodeKind::NamedTy | NodeKind::PointerTy)
+		}) {
 			Some(ty) => {
-				let id = tys.alloc(gen_ty(ty, tree));
+				let generated_ty = gen_ty(ty, tree, tys, ty_ranges);
+				let id = tys.alloc(generated_ty);
 				ty_ranges.insert(id, ty.range(tree));
 				id
 			}
@@ -117,7 +116,11 @@ pub fn pretty_print_header(header: &Header) -> String {
 						s.push_str("\n\t");
 						s.push_str(field_name);
 						s.push(' ');
-						write!(s, "{}", header.tys.get(*field_ty)).unwrap();
+						pretty_print_ty(
+							header.tys.get(*field_ty),
+							&header.tys,
+							&mut s,
+						);
 						s.push(',');
 					}
 					s.push_str("\n}");
@@ -126,7 +129,18 @@ pub fn pretty_print_header(header: &Header) -> String {
 		}
 	}
 
-	s
+	return s;
+
+	fn pretty_print_ty(ty: &Ty, tys: &Arena<Ty>, s: &mut String) {
+		match ty {
+			Ty::Named(n) => s.push_str(n),
+			Ty::Pointer(pointee) => {
+				s.push('*');
+				pretty_print_ty(tys.get(*pointee), tys, s);
+			}
+			Ty::Missing => s.push_str("<missing>"),
+		}
+	}
 }
 
 #[cfg(test)]

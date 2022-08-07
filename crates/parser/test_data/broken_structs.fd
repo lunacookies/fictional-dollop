@@ -37,13 +37,13 @@ struct unclosedateof {
 #     Field@75..78
 #       Ident@75..76 "a"
 #       Whitespace@76..77 " "
-#       Ty@77..78
+#       NamedTy@77..78
 #         Ident@77..78 "b"
 #     Whitespace@78..79 " "
 #     Field@79..82
 #       Ident@79..80 "c"
 #       Whitespace@80..81 " "
-#       Ty@81..82
+#       NamedTy@81..82
 #         Ident@81..82 "d"
 #     Whitespace@82..83 " "
 #     RBrace@83..84 "}"
@@ -57,14 +57,12 @@ struct unclosedateof {
 #     Whitespace@106..107 " "
 #     Field@107..109
 #       Ident@107..108 "a"
-#       Ty@108..109
-#         Error@108..109
-#           Comma@108..109 ","
+#       Error@108..109
+#         Comma@108..109 ","
 #     Whitespace@109..110 " "
-#     Field@110..112
+#     Field@110..111
 #       Ident@110..111 "b"
-#       Whitespace@111..112 " "
-#       Ty@112..112
+#     Whitespace@111..112 " "
 #     RBrace@112..113 "}"
 #   Whitespace@113..114 "\n"
 #   Strukt@114..139
@@ -77,9 +75,8 @@ struct unclosedateof {
 #     Field@134..137
 #       Ident@134..135 "a"
 #       Whitespace@135..136 " "
-#       Ty@136..137
-#         Error@136..137
-#           Error@136..137 "?"
+#       Error@136..137
+#         Error@136..137 "?"
 #     Whitespace@137..138 " "
 #     RBrace@138..139 "}"
 #   Whitespace@139..140 "\n"

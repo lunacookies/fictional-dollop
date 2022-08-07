@@ -47,6 +47,7 @@ fn nameres_ty(
 				kind: ErrorKind::UndefinedTy,
 			});
 		}
+		Ty::Pointer(pointee) => nameres_ty(*pointee, header, world, errors),
 		Ty::Missing => {}
 	}
 }
@@ -77,6 +78,7 @@ fn run_tests() {
 						output.push_str("undefined type")
 					}
 				}
+				output.push('\n');
 			}
 		}
 

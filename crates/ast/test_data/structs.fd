@@ -1,13 +1,13 @@
 struct b {}
 struct a {
 	foo bar,
-	baz quux,
+	baz *quux,
 }
 struct c { inner b }
 # ---
 # struct a {
 # 	foo bar,
-# 	baz quux,
+# 	baz *quux,
 # }
 #
 # struct b {}

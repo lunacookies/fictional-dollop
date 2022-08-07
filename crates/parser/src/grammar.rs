@@ -41,7 +41,18 @@ fn strukt(p: &mut Parser) {
 }
 
 fn opt_ty(p: &mut Parser) {
-	p.start_node(NodeKind::Ty);
-	p.expect_with_name(TokenKind::Ident, "type");
-	p.finish_node();
+	match p.peek() {
+		Some(TokenKind::Ident) => {
+			p.start_node(NodeKind::NamedTy);
+			p.bump(TokenKind::Ident);
+			p.finish_node();
+		}
+		Some(TokenKind::Star) => {
+			p.start_node(NodeKind::PointerTy);
+			p.bump(TokenKind::Star);
+			opt_ty(p);
+			p.finish_node();
+		}
+		_ => p.error("type"),
+	}
 }

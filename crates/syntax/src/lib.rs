@@ -12,7 +12,8 @@ pub enum NodeKind {
 	SourceFile,
 	Strukt,
 	Field,
-	Ty,
+	NamedTy,
+	PointerTy,
 	Error,
 }
 
