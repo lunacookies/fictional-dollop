@@ -1,6 +1,6 @@
-use crate::{gen_ty, Ty};
+use crate::Ty;
 use arena::{Arena, ArenaMap, Id};
-use cst::CstToken;
+use cst::{CstNode, CstToken};
 use std::collections::HashMap;
 use syntax::SyntaxTree;
 use text_size::TextRange;
@@ -20,54 +20,78 @@ pub enum Item {
 }
 
 pub fn gen_header(source_file: cst::SourceFile, tree: &SyntaxTree) -> Header {
-	let mut items = HashMap::new();
-	let mut tys = Arena::new();
-	let mut ty_ranges = ArenaMap::new();
+	GenHeaderCtx { tree, tys: Arena::new(), ty_ranges: ArenaMap::new() }
+		.gen_header(source_file)
+}
 
-	for item in source_file.items(tree) {
-		if let Some((name, item)) =
-			gen_item(item, tree, &mut tys, &mut ty_ranges)
-		{
-			items.insert(name, item);
+struct GenHeaderCtx<'a> {
+	tree: &'a SyntaxTree,
+	tys: Arena<Ty>,
+	ty_ranges: ArenaMap<Ty, TextRange>,
+}
+
+impl GenHeaderCtx<'_> {
+	fn gen_header(mut self, source_file: cst::SourceFile) -> Header {
+		let mut items = HashMap::new();
+
+		for item in source_file.items(self.tree) {
+			if let Some((name, item)) = self.gen_item(item) {
+				items.insert(name, item);
+			}
+		}
+
+		Header { items, tys: self.tys, ty_ranges: self.ty_ranges }
+	}
+
+	fn gen_item(&mut self, item: cst::Item) -> Option<(String, Item)> {
+		match item {
+			cst::Item::Strukt(s) => self.gen_strukt(s),
 		}
 	}
 
-	Header { items, tys, ty_ranges }
-}
+	fn gen_strukt(&mut self, strukt: cst::Strukt) -> Option<(String, Item)> {
+		let name = strukt.name(self.tree)?.text(self.tree);
 
-fn gen_item(
-	item: cst::Item,
-	tree: &SyntaxTree,
-	tys: &mut Arena<Ty>,
-	ty_ranges: &mut ArenaMap<Ty, TextRange>,
-) -> Option<(String, Item)> {
-	match item {
-		cst::Item::Strukt(s) => gen_strukt(s, tree, tys, ty_ranges),
+		let mut fields = Vec::new();
+
+		for field in strukt.fields(self.tree) {
+			let name = match field.name(self.tree) {
+				Some(name) => name.text(self.tree),
+				None => continue,
+			};
+
+			let ty = self.gen_ty(field.ty(self.tree));
+
+			fields.push((name.to_string(), ty));
+		}
+
+		Some((name.to_string(), Item::Strukt { fields }))
 	}
-}
 
-fn gen_strukt(
-	strukt: cst::Strukt,
-	tree: &SyntaxTree,
-	tys: &mut Arena<Ty>,
-	ty_ranges: &mut ArenaMap<Ty, TextRange>,
-) -> Option<(String, Item)> {
-	let name = strukt.name(tree)?.text(tree);
-
-	let mut fields = Vec::new();
-
-	for field in strukt.fields(tree) {
-		let name = match field.name(tree) {
-			Some(name) => name.text(tree),
-			None => continue,
+	fn gen_ty(&mut self, ty: Option<cst::Ty>) -> Id<Ty> {
+		let ty = match ty {
+			Some(t) => t,
+			None => return self.tys.alloc(Ty::Missing),
 		};
 
-		let ty = gen_ty(field.ty(tree), tree, tys, ty_ranges);
+		let id = match ty {
+			cst::Ty::NamedTy(ty) => {
+				let name = match ty.name(self.tree) {
+					Some(n) => n.text(self.tree),
+					None => return self.tys.alloc(Ty::Missing),
+				};
+				self.tys.alloc(Ty::Named(name.to_string()))
+			}
+			cst::Ty::PointerTy(ty) => {
+				let pointee = self.gen_ty(ty.pointee(self.tree));
+				self.tys.alloc(Ty::Pointer(pointee))
+			}
+		};
 
-		fields.push((name.to_string(), ty));
+		self.ty_ranges.insert(id, ty.range(self.tree));
+
+		id
 	}
-
-	Some((name.to_string(), Item::Strukt { fields }))
 }
 
 pub fn pretty_print_header(header: &Header) -> String {
