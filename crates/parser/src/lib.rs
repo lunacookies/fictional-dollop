@@ -1,20 +1,23 @@
 mod grammar;
 
+use cst::CstNode;
 use lexer::Token;
 use std::fmt;
 use syntax::{NodeKind, SyntaxBuilder, SyntaxTree, TokenKind};
 use text_size::{TextRange, TextSize};
 
-pub fn parse(input: &str) -> Parse {
+pub fn parse(input: &str) -> Parse<cst::SourceFile> {
 	let tokens = lexer::lex(input);
 	let mut parser = Parser::new(&tokens);
 	grammar::source_file(&mut parser);
 	let tree = process_events(input, &parser.events, &tokens);
-	Parse { tree, errors: parser.errors }
+	let node = cst::SourceFile::cast(tree.root(), &tree).unwrap();
+	Parse { tree, node, errors: parser.errors }
 }
 
-pub struct Parse {
+pub struct Parse<N: CstNode> {
 	pub tree: SyntaxTree,
+	pub node: N,
 	pub errors: Vec<Error>,
 }
 
@@ -189,7 +192,7 @@ impl Sink<'_> {
 	}
 }
 
-impl fmt::Debug for Parse {
+impl<N: CstNode> fmt::Debug for Parse<N> {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		write!(f, "{:#?}", self.tree)?;
 

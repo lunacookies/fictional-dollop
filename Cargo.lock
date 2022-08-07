@@ -17,6 +17,7 @@ name = "ast"
 version = "0.0.0"
 dependencies = [
  "arena",
+ "cst",
  "parser",
  "syntax",
  "test_utils",
@@ -37,6 +38,14 @@ dependencies = [
  "ast",
  "parser",
  "sema",
+ "text-size",
+]
+
+[[package]]
+name = "cst"
+version = "0.0.0"
+dependencies = [
+ "syntax",
  "text-size",
 ]
 
@@ -115,6 +124,7 @@ checksum = "18a6dbe30758c9f83eb00cbea4ac95966305f5a7772f3f42ebfc7fc7eddbd8e1"
 name = "parser"
 version = "0.0.0"
 dependencies = [
+ "cst",
  "lexer",
  "syntax",
  "test_utils",

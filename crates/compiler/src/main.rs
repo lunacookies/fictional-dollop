@@ -35,7 +35,7 @@ fn main() -> anyhow::Result<()> {
 			);
 		}
 
-		let header = ast::gen_header(&parse.tree);
+		let header = ast::gen_header(parse.node, &parse.tree);
 		world.headers.insert(file_name.to_string(), header);
 		file_map.insert(file_name.to_string(), (content, line_starts));
 	}

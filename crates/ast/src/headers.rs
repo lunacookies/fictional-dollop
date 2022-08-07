@@ -1,7 +1,8 @@
 use crate::{gen_ty, Ty};
 use arena::{Arena, ArenaMap, Id};
+use cst::CstToken;
 use std::collections::HashMap;
-use syntax::{NodeKind, SyntaxNode, SyntaxTree, TokenKind};
+use syntax::SyntaxTree;
 use text_size::TextRange;
 
 pub struct World {
@@ -18,15 +19,14 @@ pub enum Item {
 	Strukt { fields: Vec<(String, Id<Ty>)> },
 }
 
-pub fn gen_header(tree: &SyntaxTree) -> Header {
-	let root = tree.root();
+pub fn gen_header(source_file: cst::SourceFile, tree: &SyntaxTree) -> Header {
 	let mut items = HashMap::new();
 	let mut tys = Arena::new();
 	let mut ty_ranges = ArenaMap::new();
 
-	for child in root.child_nodes(tree) {
+	for item in source_file.items(tree) {
 		if let Some((name, item)) =
-			gen_item(child, tree, &mut tys, &mut ty_ranges)
+			gen_item(item, tree, &mut tys, &mut ty_ranges)
 		{
 			items.insert(name, item);
 		}
@@ -36,54 +36,33 @@ pub fn gen_header(tree: &SyntaxTree) -> Header {
 }
 
 fn gen_item(
-	node: SyntaxNode,
+	item: cst::Item,
 	tree: &SyntaxTree,
 	tys: &mut Arena<Ty>,
 	ty_ranges: &mut ArenaMap<Ty, TextRange>,
 ) -> Option<(String, Item)> {
-	match node.kind(tree) {
-		NodeKind::Strukt => gen_strukt(node, tree, tys, ty_ranges),
-		_ => None,
+	match item {
+		cst::Item::Strukt(s) => gen_strukt(s, tree, tys, ty_ranges),
 	}
 }
 
 fn gen_strukt(
-	node: SyntaxNode,
+	strukt: cst::Strukt,
 	tree: &SyntaxTree,
 	tys: &mut Arena<Ty>,
 	ty_ranges: &mut ArenaMap<Ty, TextRange>,
 ) -> Option<(String, Item)> {
-	let name = node
-		.child_tokens(tree)
-		.find(|t| t.kind(tree) == TokenKind::Ident)
-		.map(|t| t.text(tree))?;
+	let name = strukt.name(tree)?.text(tree);
 
 	let mut fields = Vec::new();
 
-	for child in node.child_nodes(tree) {
-		if child.kind(tree) != NodeKind::Field {
-			continue;
-		}
-
-		let name = match child
-			.child_tokens(tree)
-			.find(|t| t.kind(tree) == TokenKind::Ident)
-		{
+	for field in strukt.fields(tree) {
+		let name = match field.name(tree) {
 			Some(name) => name.text(tree),
 			None => continue,
 		};
 
-		let ty = match child.child_nodes(tree).find(|n| {
-			matches!(n.kind(tree), NodeKind::NamedTy | NodeKind::PointerTy)
-		}) {
-			Some(ty) => {
-				let generated_ty = gen_ty(ty, tree, tys, ty_ranges);
-				let id = tys.alloc(generated_ty);
-				ty_ranges.insert(id, ty.range(tree));
-				id
-			}
-			None => tys.alloc(Ty::Missing),
-		};
+		let ty = gen_ty(field.ty(tree), tree, tys, ty_ranges);
 
 		fields.push((name.to_string(), ty));
 	}
@@ -147,7 +126,8 @@ pub fn pretty_print_header(header: &Header) -> String {
 #[test]
 fn run_tests() {
 	test_utils::run_tests(|input| {
-		let header = gen_header(&parser::parse(input).tree);
+		let parse = parser::parse(input);
+		let header = gen_header(parse.node, &parse.tree);
 		pretty_print_header(&header)
 	});
 }

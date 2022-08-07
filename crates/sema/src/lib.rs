@@ -63,7 +63,8 @@ fn run_tests() {
 		let mut world = World { headers: HashMap::new() };
 
 		for (file_name, input) in files {
-			let header = ast::gen_header(&parser::parse(input).tree);
+			let parse = parser::parse(input);
+			let header = ast::gen_header(parse.node, &parse.tree);
 			world.headers.insert(file_name.to_string(), header);
 		}
 

@@ -2,7 +2,8 @@ mod headers;
 pub use headers::*;
 
 use arena::{Arena, ArenaMap, Id};
-use syntax::{NodeKind, SyntaxNode, SyntaxTree, TokenKind};
+use cst::{CstNode, CstToken};
+use syntax::SyntaxTree;
 use text_size::TextRange;
 
 pub enum Ty {
@@ -12,38 +13,32 @@ pub enum Ty {
 }
 
 fn gen_ty(
-	node: SyntaxNode,
+	ty: Option<cst::Ty>,
 	tree: &SyntaxTree,
 	tys: &mut Arena<Ty>,
 	ty_ranges: &mut ArenaMap<Ty, TextRange>,
-) -> Ty {
-	match node.kind(tree) {
-		NodeKind::NamedTy => {
-			let name = match node
-				.child_tokens(tree)
-				.find(|t| t.kind(tree) == TokenKind::Ident)
-			{
-				Some(t) => t.text(tree),
-				None => return Ty::Missing,
+) -> Id<Ty> {
+	let ty = match ty {
+		Some(t) => t,
+		None => return tys.alloc(Ty::Missing),
+	};
+
+	let id = match ty {
+		cst::Ty::NamedTy(ty) => {
+			let name = match ty.name(tree) {
+				Some(n) => n.text(tree),
+				None => return tys.alloc(Ty::Missing),
 			};
 
-			Ty::Named(name.to_string())
+			tys.alloc(Ty::Named(name.to_string()))
 		}
-		NodeKind::PointerTy => {
-			let ty = match node.child_nodes(tree).find(|n| {
-				matches!(n.kind(tree), NodeKind::NamedTy | NodeKind::PointerTy)
-			}) {
-				Some(ty) => {
-					let generated_ty = gen_ty(ty, tree, tys, ty_ranges);
-					let id = tys.alloc(generated_ty);
-					ty_ranges.insert(id, ty.range(tree));
-					id
-				}
-				None => tys.alloc(Ty::Missing),
-			};
+		cst::Ty::PointerTy(ty) => {
+			let pointee = gen_ty(ty.pointee(tree), tree, tys, ty_ranges);
+			tys.alloc(Ty::Pointer(pointee))
+		}
+	};
 
-			Ty::Pointer(ty)
-		}
-		_ => unreachable!(),
-	}
+	ty_ranges.insert(id, ty.range(tree));
+
+	id
 }

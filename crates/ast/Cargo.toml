@@ -5,6 +5,7 @@ version = "0.0.0"
 
 [dependencies]
 arena = {path = "../arena"}
+cst = {path = "../cst"}
 syntax = {path = "../syntax"}
 text-size = "1.1.0"
 
