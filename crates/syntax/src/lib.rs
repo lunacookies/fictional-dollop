@@ -26,6 +26,7 @@ pub enum TokenKind {
 	RBrace,
 	Star,
 	Comma,
+	Dot,
 	Whitespace,
 	Error,
 }
@@ -67,6 +68,7 @@ impl fmt::Display for TokenKind {
 			TokenKind::RBrace => "`}`",
 			TokenKind::Star => "`*`",
 			TokenKind::Comma => "`,`",
+			TokenKind::Dot => "`.`",
 			TokenKind::Whitespace => "whitespace",
 			TokenKind::Error => "unrecognized token",
 		};

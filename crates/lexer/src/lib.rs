@@ -48,6 +48,9 @@ enum LogosTokenKind {
 	#[token(",")]
 	Comma,
 
+	#[token(".")]
+	Dot,
+
 	#[regex("[ \t\n]+")]
 	Whitespace,
 
@@ -118,10 +121,11 @@ mod tests {
 	#[test]
 	fn symbols() {
 		check(
-			"*,",
+			"*,.",
 			expect![["
 				Star@0..1
-				Comma@1..2"]],
+				Comma@1..2
+				Dot@2..3"]],
 		);
 	}
 }
