@@ -14,6 +14,8 @@ pub enum NodeKind {
 	Field,
 	NamedTy,
 	PointerTy,
+	ForeignPath,
+	LocalPath,
 	Error,
 }
 

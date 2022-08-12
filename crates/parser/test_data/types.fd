@@ -13,7 +13,8 @@ struct pointer { f *t }
 #       Ident@14..15 "f"
 #       Whitespace@15..16 " "
 #       NamedTy@16..17
-#         Ident@16..17 "t"
+#         LocalPath@16..17
+#           Ident@16..17 "t"
 #     Whitespace@17..18 " "
 #     RBrace@18..19 "}"
 #   Whitespace@19..20 "\n"
@@ -30,7 +31,8 @@ struct pointer { f *t }
 #       PointerTy@39..41
 #         Star@39..40 "*"
 #         NamedTy@40..41
-#           Ident@40..41 "t"
+#           LocalPath@40..41
+#             Ident@40..41 "t"
 #     Whitespace@41..42 " "
 #     RBrace@42..43 "}"
 #   Whitespace@43..44 "\n"

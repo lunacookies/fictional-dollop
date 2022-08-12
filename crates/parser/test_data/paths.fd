@@ -1,0 +1,38 @@
+struct local { x foo }
+struct foreign { x foo.bar }
+# ---
+# SourceFile@0..52
+#   Strukt@0..22
+#     StructKw@0..6 "struct"
+#     Whitespace@6..7 " "
+#     Ident@7..12 "local"
+#     Whitespace@12..13 " "
+#     LBrace@13..14 "{"
+#     Whitespace@14..15 " "
+#     Field@15..20
+#       Ident@15..16 "x"
+#       Whitespace@16..17 " "
+#       NamedTy@17..20
+#         LocalPath@17..20
+#           Ident@17..20 "foo"
+#     Whitespace@20..21 " "
+#     RBrace@21..22 "}"
+#   Whitespace@22..23 "\n"
+#   Strukt@23..51
+#     StructKw@23..29 "struct"
+#     Whitespace@29..30 " "
+#     Ident@30..37 "foreign"
+#     Whitespace@37..38 " "
+#     LBrace@38..39 "{"
+#     Whitespace@39..40 " "
+#     Field@40..49
+#       Ident@40..41 "x"
+#       Whitespace@41..42 " "
+#       NamedTy@42..49
+#         ForeignPath@42..49
+#           Ident@42..45 "foo"
+#           Dot@45..46 "."
+#           Ident@46..49 "bar"
+#     Whitespace@49..50 " "
+#     RBrace@50..51 "}"
+#   Whitespace@51..52 "\n"

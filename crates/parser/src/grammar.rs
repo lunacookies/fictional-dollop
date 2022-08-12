@@ -44,7 +44,7 @@ fn opt_ty(p: &mut Parser) {
 	match p.peek() {
 		Some(TokenKind::Ident) => {
 			p.start_node(NodeKind::NamedTy);
-			p.bump(TokenKind::Ident);
+			path(p);
 			p.finish_node();
 		}
 		Some(TokenKind::Star) => {
@@ -55,4 +55,19 @@ fn opt_ty(p: &mut Parser) {
 		}
 		_ => p.error("type"),
 	}
+}
+
+fn path(p: &mut Parser) {
+	if p.lookahead() != Some(TokenKind::Dot) {
+		p.start_node(NodeKind::LocalPath);
+		p.bump(TokenKind::Ident);
+		p.finish_node();
+		return;
+	}
+
+	p.start_node(NodeKind::ForeignPath);
+	p.bump(TokenKind::Ident);
+	p.bump(TokenKind::Dot);
+	p.expect_with_name(TokenKind::Ident, "path segment");
+	p.finish_node();
 }

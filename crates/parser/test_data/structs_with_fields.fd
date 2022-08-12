@@ -15,7 +15,8 @@ struct d { foo bar, baz quux, }
 #       Ident@11..14 "foo"
 #       Whitespace@14..15 " "
 #       NamedTy@15..18
-#         Ident@15..18 "bar"
+#         LocalPath@15..18
+#           Ident@15..18 "bar"
 #     Whitespace@18..19 " "
 #     RBrace@19..20 "}"
 #   Whitespace@20..21 "\n"
@@ -30,7 +31,8 @@ struct d { foo bar, baz quux, }
 #       Ident@32..35 "foo"
 #       Whitespace@35..36 " "
 #       NamedTy@36..39
-#         Ident@36..39 "bar"
+#         LocalPath@36..39
+#           Ident@36..39 "bar"
 #     Comma@39..40 ","
 #     Whitespace@40..41 " "
 #     RBrace@41..42 "}"
@@ -46,14 +48,16 @@ struct d { foo bar, baz quux, }
 #       Ident@54..57 "foo"
 #       Whitespace@57..58 " "
 #       NamedTy@58..61
-#         Ident@58..61 "bar"
+#         LocalPath@58..61
+#           Ident@58..61 "bar"
 #     Comma@61..62 ","
 #     Whitespace@62..63 " "
 #     Field@63..71
 #       Ident@63..66 "baz"
 #       Whitespace@66..67 " "
 #       NamedTy@67..71
-#         Ident@67..71 "quux"
+#         LocalPath@67..71
+#           Ident@67..71 "quux"
 #     Whitespace@71..72 " "
 #     RBrace@72..73 "}"
 #   Whitespace@73..74 "\n"
@@ -68,14 +72,16 @@ struct d { foo bar, baz quux, }
 #       Ident@85..88 "foo"
 #       Whitespace@88..89 " "
 #       NamedTy@89..92
-#         Ident@89..92 "bar"
+#         LocalPath@89..92
+#           Ident@89..92 "bar"
 #     Comma@92..93 ","
 #     Whitespace@93..94 " "
 #     Field@94..102
 #       Ident@94..97 "baz"
 #       Whitespace@97..98 " "
 #       NamedTy@98..102
-#         Ident@98..102 "quux"
+#         LocalPath@98..102
+#           Ident@98..102 "quux"
 #     Comma@102..103 ","
 #     Whitespace@103..104 " "
 #     RBrace@104..105 "}"

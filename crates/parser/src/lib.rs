@@ -75,6 +75,10 @@ impl Parser {
 		Some(self.tokens[self.cursor].kind)
 	}
 
+	fn lookahead(&self) -> Option<TokenKind> {
+		self.tokens.get(self.cursor + 1).map(|t| t.kind)
+	}
+
 	fn error(&mut self, message: &str) {
 		if self.at_recovery() {
 			self.errors.push(Error::Missing {
