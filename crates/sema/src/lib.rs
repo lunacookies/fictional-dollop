@@ -1,5 +1,5 @@
 use arena::Id;
-use ast::{Header, Item, Ty, World};
+use ast::{Header, Item, Path, Ty, World};
 use text_size::TextRange;
 
 pub fn nameres(header: &Header, world: &World) -> Vec<Error> {
@@ -24,7 +24,8 @@ pub struct Error {
 }
 
 pub enum ErrorKind {
-	UndefinedTy,
+	UndefinedItem,
+	UndefinedModule,
 }
 
 fn nameres_ty(
@@ -33,22 +34,51 @@ fn nameres_ty(
 	world: &World,
 	errors: &mut Vec<Error>,
 ) {
-	match header.tys.get(ty) {
-		Ty::Named(n) => {
-			for header in world.headers.values() {
-				match header.items.get(n) {
-					Some(Item::Strukt { .. }) => return,
-					None => {}
+	match *header.tys.get(ty) {
+		Ty::Named(path) => match nameres_path(path, header, world, errors) {
+			Some(item) => match item {
+				Item::Strukt { .. } => {}
+			},
+			None => {}
+		},
+		Ty::Pointer(pointee) => nameres_ty(pointee, header, world, errors),
+		Ty::Missing => {}
+	}
+}
+
+fn nameres_path<'a>(
+	path: Path,
+	header: &'a Header,
+	world: &'a World,
+	errors: &mut Vec<Error>,
+) -> Option<&'a Item> {
+	let (h, item) = match path {
+		Path::Local { item } => (header, item),
+		Path::Foreign { module, item } => {
+			let module_text = header.path_segments.get(module);
+			match world.headers.get(module_text) {
+				Some(h) => (h, item),
+				None => {
+					errors.push(Error {
+						range: *header.path_segment_ranges.get(module),
+						kind: ErrorKind::UndefinedModule,
+					});
+					return None;
 				}
 			}
-
-			errors.push(Error {
-				range: *header.ty_ranges.get(ty),
-				kind: ErrorKind::UndefinedTy,
-			});
 		}
-		Ty::Pointer(pointee) => nameres_ty(*pointee, header, world, errors),
-		Ty::Missing => {}
+	};
+
+	let item_text = header.path_segments.get(item);
+	match h.items.get(item_text) {
+		Some(i) => Some(i),
+		None => {
+			errors.push(Error {
+				range: *header.path_segment_ranges.get(item),
+				kind: ErrorKind::UndefinedItem,
+			});
+			None
+		}
 	}
 }
 
@@ -75,8 +105,11 @@ fn run_tests() {
 				write!(output, "error in {file_name} at {:?}: ", error.range)
 					.unwrap();
 				match error.kind {
-					ErrorKind::UndefinedTy => {
-						output.push_str("undefined type")
+					ErrorKind::UndefinedItem => {
+						output.push_str("undefined item")
+					}
+					ErrorKind::UndefinedModule => {
+						output.push_str("undefined module")
 					}
 				}
 				output.push('\n');

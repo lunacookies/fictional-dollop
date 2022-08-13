@@ -1,0 +1,5 @@
+#- main
+struct a { foo b.bar }
+#- b
+# ---
+# error in main at 17..20: undefined item

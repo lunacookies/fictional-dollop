@@ -5,14 +5,14 @@ use text_size::TextSize;
 
 fn main() -> anyhow::Result<()> {
 	let mut world = ast::World { headers: HashMap::new() };
-	let mut file_map = HashMap::new();
+	let mut line_starts_map = HashMap::new();
 
 	for entry in fs::read_dir(".")? {
 		let path = entry?.path();
 		if path.extension() != Some(OsStr::new("fd")) {
 			continue;
 		}
-		let file_name = path.file_name().unwrap().to_str().unwrap();
+		let name = path.file_stem().unwrap().to_str().unwrap();
 
 		let content = fs::read_to_string(&path)?;
 		let line_starts = line_starts(&content);
@@ -29,31 +29,34 @@ fn main() -> anyhow::Result<()> {
 			};
 			let (line, column) = offset_to_line_column(offset, &line_starts);
 			println!(
-				"{file_name}:{}:{}: error: {message}",
+				"{name}.fd:{}:{}: error: {message}",
 				line + 1,
 				column + 1
 			);
 		}
 
 		let header = ast::gen_header(parse.node, &parse.tree);
-		world.headers.insert(file_name.to_string(), header);
-		file_map.insert(file_name.to_string(), (content, line_starts));
+		world.headers.insert(name.to_string(), header);
+		line_starts_map.insert(name.to_string(), (content, line_starts));
 	}
 
-	for (file_name, header) in &world.headers {
-		let (content, line_starts) = &file_map[file_name];
+	for (name, header) in &world.headers {
+		let (content, line_starts) = &line_starts_map[name];
 		let errors = sema::nameres(header, &world);
 
 		for error in errors {
 			let message = match error.kind {
-				sema::ErrorKind::UndefinedTy => {
-					format!("undefined type `{}`", &content[error.range])
+				sema::ErrorKind::UndefinedItem => {
+					format!("undefined item `{}`", &content[error.range])
+				}
+				sema::ErrorKind::UndefinedModule => {
+					format!("undefined module `{}`", &content[error.range])
 				}
 			};
 			let (line, column) =
 				offset_to_line_column(error.range.start(), line_starts);
 			println!(
-				"{file_name}:{}:{}: error: {message}",
+				"{name}.fd:{}:{}: error: {message}",
 				line + 1,
 				column + 1
 			);

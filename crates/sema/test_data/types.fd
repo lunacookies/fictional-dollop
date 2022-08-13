@@ -4,5 +4,5 @@ struct a {
     pointer *foo,
 }
 # ---
-# error in main at 21..24: undefined type
-# error in main at 39..42: undefined type
+# error in main at 21..24: undefined item
+# error in main at 39..42: undefined item

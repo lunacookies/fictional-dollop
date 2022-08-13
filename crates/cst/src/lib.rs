@@ -91,9 +91,12 @@ define_node!(SourceFile);
 define_compound_node!(Item, kinds: [Strukt]);
 define_node!(Strukt);
 define_node!(Field);
-define_compound_node!(Ty, kinds: [NamedTy,PointerTy]);
+define_compound_node!(Ty, kinds: [NamedTy, PointerTy]);
 define_node!(NamedTy);
 define_node!(PointerTy);
+define_compound_node!(Path, kinds: [ForeignPath, LocalPath]);
+define_node!(ForeignPath);
+define_node!(LocalPath);
 define_token!(Ident);
 
 impl SourceFile {
@@ -126,14 +129,30 @@ impl Field {
 }
 
 impl NamedTy {
-	pub fn name(self, tree: &SyntaxTree) -> Option<Ident> {
-		token(self, tree)
+	pub fn path(self, tree: &SyntaxTree) -> Option<Path> {
+		node(self, tree)
 	}
 }
 
 impl PointerTy {
 	pub fn pointee(self, tree: &SyntaxTree) -> Option<Ty> {
 		node(self, tree)
+	}
+}
+
+impl ForeignPath {
+	pub fn module_name(self, tree: &SyntaxTree) -> Option<Ident> {
+		token(self, tree)
+	}
+
+	pub fn item_name(self, tree: &SyntaxTree) -> Option<Ident> {
+		tokens(self, tree).nth(1)
+	}
+}
+
+impl LocalPath {
+	pub fn item_name(self, tree: &SyntaxTree) -> Option<Ident> {
+		token(self, tree)
 	}
 }
 
@@ -156,4 +175,11 @@ fn nodes<Parent: CstNode, Child: CstNode>(
 	tree: &SyntaxTree,
 ) -> impl Iterator<Item = Child> + '_ {
 	node.syntax().child_nodes(tree).filter_map(|c| Child::cast(c, tree))
+}
+
+fn tokens<Parent: CstNode, Child: CstToken>(
+	node: Parent,
+	tree: &SyntaxTree,
+) -> impl Iterator<Item = Child> + '_ {
+	node.syntax().child_tokens(tree).filter_map(|c| Child::cast(c, tree))
 }

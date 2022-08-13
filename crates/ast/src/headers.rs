@@ -1,4 +1,4 @@
-use crate::Ty;
+use crate::{Path, Ty};
 use arena::{Arena, ArenaMap, Id};
 use cst::{CstNode, CstToken};
 use std::collections::HashMap;
@@ -13,6 +13,8 @@ pub struct Header {
 	pub items: HashMap<String, Item>,
 	pub tys: Arena<Ty>,
 	pub ty_ranges: ArenaMap<Ty, TextRange>,
+	pub path_segments: Arena<String>,
+	pub path_segment_ranges: ArenaMap<String, TextRange>,
 }
 
 pub enum Item {
@@ -20,14 +22,22 @@ pub enum Item {
 }
 
 pub fn gen_header(source_file: cst::SourceFile, tree: &SyntaxTree) -> Header {
-	GenHeaderCtx { tree, tys: Arena::new(), ty_ranges: ArenaMap::new() }
-		.gen_header(source_file)
+	GenHeaderCtx {
+		tree,
+		tys: Arena::new(),
+		ty_ranges: ArenaMap::new(),
+		path_segments: Arena::new(),
+		path_segment_ranges: ArenaMap::new(),
+	}
+	.gen_header(source_file)
 }
 
 struct GenHeaderCtx<'a> {
 	tree: &'a SyntaxTree,
 	tys: Arena<Ty>,
 	ty_ranges: ArenaMap<Ty, TextRange>,
+	path_segments: Arena<String>,
+	path_segment_ranges: ArenaMap<String, TextRange>,
 }
 
 impl GenHeaderCtx<'_> {
@@ -40,7 +50,13 @@ impl GenHeaderCtx<'_> {
 			}
 		}
 
-		Header { items, tys: self.tys, ty_ranges: self.ty_ranges }
+		Header {
+			items,
+			tys: self.tys,
+			ty_ranges: self.ty_ranges,
+			path_segments: self.path_segments,
+			path_segment_ranges: self.path_segment_ranges,
+		}
 	}
 
 	fn gen_item(&mut self, item: cst::Item) -> Option<(String, Item)> {
@@ -76,11 +92,12 @@ impl GenHeaderCtx<'_> {
 
 		let id = match ty {
 			cst::Ty::NamedTy(ty) => {
-				let name = match ty.name(self.tree) {
-					Some(n) => n.text(self.tree),
-					None => return self.tys.alloc(Ty::Missing),
-				};
-				self.tys.alloc(Ty::Named(name.to_string()))
+				let path =
+					match ty.path(self.tree).and_then(|p| self.gen_path(p)) {
+						Some(p) => p,
+						None => return self.tys.alloc(Ty::Missing),
+					};
+				self.tys.alloc(Ty::Named(path))
 			}
 			cst::Ty::PointerTy(ty) => {
 				let pointee = self.gen_ty(ty.pointee(self.tree));
@@ -92,56 +109,98 @@ impl GenHeaderCtx<'_> {
 
 		id
 	}
+
+	fn gen_path(&mut self, path: cst::Path) -> Option<Path> {
+		let p = match path {
+			cst::Path::ForeignPath(p) => Path::Foreign {
+				module: self.gen_path_segment(p.module_name(self.tree)?),
+				item: self.gen_path_segment(p.item_name(self.tree)?),
+			},
+			cst::Path::LocalPath(p) => Path::Local {
+				item: self.gen_path_segment(p.item_name(self.tree)?),
+			},
+		};
+
+		Some(p)
+	}
+
+	fn gen_path_segment(&mut self, ident: cst::Ident) -> Id<String> {
+		let s = ident.text(self.tree).to_string();
+		let id = self.path_segments.alloc(s);
+		self.path_segment_ranges.insert(id, ident.range(self.tree));
+		id
+	}
 }
 
 pub fn pretty_print_header(header: &Header) -> String {
-	let mut s = String::new();
+	PrettyPrintHeaderCtx { header, s: String::new() }.pretty_print()
+}
 
-	let mut items: Vec<_> = header.items.iter().collect();
-	items.sort_by_key(|(name, _)| *name);
+struct PrettyPrintHeaderCtx<'a> {
+	header: &'a Header,
+	s: String,
+}
 
-	for (i, (name, item)) in items.into_iter().enumerate() {
-		if i != 0 {
-			s.push_str("\n\n");
+impl PrettyPrintHeaderCtx<'_> {
+	fn pretty_print(mut self) -> String {
+		let mut items: Vec<_> = self.header.items.iter().collect();
+		items.sort_by_key(|(name, _)| *name);
+
+		for (i, (name, item)) in items.into_iter().enumerate() {
+			if i != 0 {
+				self.s.push_str("\n\n");
+			}
+			self.item(name, item);
 		}
 
+		self.s
+	}
+
+	fn item(&mut self, name: &str, item: &Item) {
 		match item {
 			Item::Strukt { fields } => {
-				s.push_str("struct ");
-				s.push_str(name);
-				s.push(' ');
+				self.s.push_str("struct ");
+				self.s.push_str(name);
+				self.s.push(' ');
 
 				if fields.is_empty() {
-					s.push_str("{}");
+					self.s.push_str("{}");
 				} else {
-					s.push('{');
+					self.s.push('{');
 					for (field_name, field_ty) in fields {
-						s.push_str("\n\t");
-						s.push_str(field_name);
-						s.push(' ');
-						pretty_print_ty(
-							header.tys.get(*field_ty),
-							&header.tys,
-							&mut s,
-						);
-						s.push(',');
+						self.s.push_str("\n\t");
+						self.s.push_str(field_name);
+						self.s.push(' ');
+						self.ty(*self.header.tys.get(*field_ty));
+						self.s.push(',');
 					}
-					s.push_str("\n}");
+					self.s.push_str("\n}");
 				}
 			}
 		}
 	}
 
-	return s;
-
-	fn pretty_print_ty(ty: &Ty, tys: &Arena<Ty>, s: &mut String) {
+	fn ty(&mut self, ty: Ty) {
 		match ty {
-			Ty::Named(n) => s.push_str(n),
+			Ty::Named(path) => self.path(path),
 			Ty::Pointer(pointee) => {
-				s.push('*');
-				pretty_print_ty(tys.get(*pointee), tys, s);
+				self.s.push('*');
+				self.ty(*self.header.tys.get(pointee));
 			}
-			Ty::Missing => s.push_str("<missing>"),
+			Ty::Missing => self.s.push_str("<missing>"),
+		}
+	}
+
+	fn path(&mut self, path: Path) {
+		match path {
+			Path::Local { item } => {
+				self.s.push_str(self.header.path_segments.get(item))
+			}
+			Path::Foreign { module, item } => {
+				self.s.push_str(self.header.path_segments.get(module));
+				self.s.push('.');
+				self.s.push_str(self.header.path_segments.get(item));
+			}
 		}
 	}
 }

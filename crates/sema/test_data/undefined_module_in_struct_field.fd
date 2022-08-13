@@ -1,0 +1,4 @@
+#- main
+struct a { foo bar.baz }
+# ---
+# error in main at 15..18: undefined module

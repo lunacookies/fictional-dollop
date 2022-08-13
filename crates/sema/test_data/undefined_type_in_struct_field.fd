@@ -1,4 +1,4 @@
 #- main
 struct a { foo bar }
 # ---
-# error in main at 15..18: undefined type
+# error in main at 15..18: undefined item
