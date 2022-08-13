@@ -1,8 +1,8 @@
 #- main
 struct a {
-    named foo,
-    pointer *foo,
+	named foo,
+	pointer *foo,
 }
 # ---
-# error in main at 21..24: undefined item
-# error in main at 39..42: undefined item
+# error in main at 18..21: undefined item
+# error in main at 33..36: undefined item
