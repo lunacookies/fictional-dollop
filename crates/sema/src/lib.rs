@@ -42,7 +42,7 @@ fn nameres_ty(
 			None => {}
 		},
 		Ty::Pointer(pointee) => nameres_ty(pointee, header, world, errors),
-		Ty::Missing => {}
+		Ty::U32 | Ty::Missing => {}
 	}
 }
 

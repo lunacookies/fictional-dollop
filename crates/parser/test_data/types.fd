@@ -1,7 +1,8 @@
 struct bare { f t }
 struct pointer { f *t }
+struct unsigned32 { f u32 }
 # ---
-# SourceFile@0..44
+# SourceFile@0..72
 #   Strukt@0..19
 #     StructKw@0..6 "struct"
 #     Whitespace@6..7 " "
@@ -36,3 +37,18 @@ struct pointer { f *t }
 #     Whitespace@41..42 " "
 #     RBrace@42..43 "}"
 #   Whitespace@43..44 "\n"
+#   Strukt@44..71
+#     StructKw@44..50 "struct"
+#     Whitespace@50..51 " "
+#     Ident@51..61 "unsigned32"
+#     Whitespace@61..62 " "
+#     LBrace@62..63 "{"
+#     Whitespace@63..64 " "
+#     Field@64..69
+#       Ident@64..65 "f"
+#       Whitespace@65..66 " "
+#       PrimitiveTy@66..69
+#         U32Kw@66..69 "u32"
+#     Whitespace@69..70 " "
+#     RBrace@70..71 "}"
+#   Whitespace@71..72 "\n"

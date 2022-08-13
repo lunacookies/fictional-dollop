@@ -1,0 +1,11 @@
+struct a {
+	named foo,
+	pointer *foo,
+	unsigned32 u32,
+}
+# ---
+# struct a {
+# 	named foo,
+# 	pointer *foo,
+# 	unsigned32 u32,
+# }

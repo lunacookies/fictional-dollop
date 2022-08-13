@@ -7,6 +7,7 @@ use arena::Id;
 pub enum Ty {
 	Named(Path),
 	Pointer(Id<Ty>),
+	U32,
 	Missing,
 }
 

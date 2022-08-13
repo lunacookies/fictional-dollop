@@ -86,6 +86,12 @@ impl GenHeaderCtx<'_> {
 				let pointee = self.gen_ty(ty.pointee(self.tree));
 				self.header.tys.alloc(Ty::Pointer(pointee))
 			}
+			cst::Ty::PrimitiveTy(ty) => match ty.kind(self.tree) {
+				Some(cst::PrimitiveTyKind::U32) => {
+					self.header.tys.alloc(Ty::U32)
+				}
+				None => self.header.tys.alloc(Ty::Missing),
+			},
 		};
 
 		self.header.ty_ranges.insert(id, ty.range(self.tree));
@@ -170,6 +176,7 @@ impl PrettyPrintHeaderCtx<'_> {
 				self.s.push('*');
 				self.ty(*self.header.tys.get(pointee));
 			}
+			Ty::U32 => self.s.push_str("u32"),
 			Ty::Missing => self.s.push_str("<missing>"),
 		}
 	}

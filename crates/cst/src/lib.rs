@@ -91,9 +91,10 @@ define_node!(SourceFile);
 define_compound_node!(Item, kinds: [Strukt]);
 define_node!(Strukt);
 define_node!(Field);
-define_compound_node!(Ty, kinds: [NamedTy, PointerTy]);
+define_compound_node!(Ty, kinds: [NamedTy, PointerTy, PrimitiveTy]);
 define_node!(NamedTy);
 define_node!(PointerTy);
+define_node!(PrimitiveTy);
 define_compound_node!(Path, kinds: [ForeignPath, LocalPath]);
 define_node!(ForeignPath);
 define_node!(LocalPath);
@@ -138,6 +139,19 @@ impl PointerTy {
 	pub fn pointee(self, tree: &SyntaxTree) -> Option<Ty> {
 		node(self, tree)
 	}
+}
+
+impl PrimitiveTy {
+	pub fn kind(self, tree: &SyntaxTree) -> Option<PrimitiveTyKind> {
+		self.0.child_tokens(tree).next().and_then(|t| match t.kind(tree) {
+			TokenKind::U32Kw => Some(PrimitiveTyKind::U32),
+			_ => None,
+		})
+	}
+}
+
+pub enum PrimitiveTyKind {
+	U32,
 }
 
 impl ForeignPath {

@@ -53,6 +53,11 @@ fn opt_ty(p: &mut Parser) {
 			opt_ty(p);
 			p.finish_node();
 		}
+		Some(TokenKind::U32Kw) => {
+			p.start_node(NodeKind::PrimitiveTy);
+			p.bump(TokenKind::U32Kw);
+			p.finish_node();
+		}
 		_ => p.error("type"),
 	}
 }

@@ -33,6 +33,9 @@ enum LogosTokenKind {
 	#[token("struct")]
 	StructKw,
 
+	#[token("u32")]
+	U32Kw,
+
 	#[regex("[a-z][a-z0-9]*")]
 	Ident,
 
@@ -92,6 +95,17 @@ mod tests {
 			" \t  \n\t  ",
 			expect![["
 				Whitespace@0..8"]],
+		);
+	}
+
+	#[test]
+	fn keywords() {
+		check(
+			"struct u32",
+			expect![["
+				StructKw@0..6
+				Whitespace@6..7
+				U32Kw@7..10"]],
 		);
 	}
 

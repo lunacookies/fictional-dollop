@@ -14,6 +14,7 @@ pub enum NodeKind {
 	Field,
 	NamedTy,
 	PointerTy,
+	PrimitiveTy,
 	ForeignPath,
 	LocalPath,
 	Error,
@@ -23,6 +24,7 @@ pub enum NodeKind {
 #[repr(u8)]
 pub enum TokenKind {
 	StructKw,
+	U32Kw,
 	Ident,
 	LBrace,
 	RBrace,
@@ -65,6 +67,7 @@ impl fmt::Display for TokenKind {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		let s = match self {
 			TokenKind::StructKw => "`struct`",
+			TokenKind::U32Kw => "`u32`",
 			TokenKind::Ident => "identifier",
 			TokenKind::LBrace => "`{`",
 			TokenKind::RBrace => "`}`",
