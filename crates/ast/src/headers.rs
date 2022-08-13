@@ -9,6 +9,7 @@ pub struct World {
 	pub headers: HashMap<String, Header>,
 }
 
+#[derive(Default)]
 pub struct Header {
 	pub items: HashMap<String, Item>,
 	pub tys: Arena<Ty>,
@@ -22,41 +23,23 @@ pub enum Item {
 }
 
 pub fn gen_header(source_file: cst::SourceFile, tree: &SyntaxTree) -> Header {
-	GenHeaderCtx {
-		tree,
-		tys: Arena::new(),
-		ty_ranges: ArenaMap::new(),
-		path_segments: Arena::new(),
-		path_segment_ranges: ArenaMap::new(),
-	}
-	.gen_header(source_file)
+	GenHeaderCtx { tree, header: Header::default() }.gen_header(source_file)
 }
 
 struct GenHeaderCtx<'a> {
 	tree: &'a SyntaxTree,
-	tys: Arena<Ty>,
-	ty_ranges: ArenaMap<Ty, TextRange>,
-	path_segments: Arena<String>,
-	path_segment_ranges: ArenaMap<String, TextRange>,
+	header: Header,
 }
 
 impl GenHeaderCtx<'_> {
 	fn gen_header(mut self, source_file: cst::SourceFile) -> Header {
-		let mut items = HashMap::new();
-
 		for item in source_file.items(self.tree) {
 			if let Some((name, item)) = self.gen_item(item) {
-				items.insert(name, item);
+				self.header.items.insert(name, item);
 			}
 		}
 
-		Header {
-			items,
-			tys: self.tys,
-			ty_ranges: self.ty_ranges,
-			path_segments: self.path_segments,
-			path_segment_ranges: self.path_segment_ranges,
-		}
+		self.header
 	}
 
 	fn gen_item(&mut self, item: cst::Item) -> Option<(String, Item)> {
@@ -87,7 +70,7 @@ impl GenHeaderCtx<'_> {
 	fn gen_ty(&mut self, ty: Option<cst::Ty>) -> Id<Ty> {
 		let ty = match ty {
 			Some(t) => t,
-			None => return self.tys.alloc(Ty::Missing),
+			None => return self.header.tys.alloc(Ty::Missing),
 		};
 
 		let id = match ty {
@@ -95,17 +78,17 @@ impl GenHeaderCtx<'_> {
 				let path =
 					match ty.path(self.tree).and_then(|p| self.gen_path(p)) {
 						Some(p) => p,
-						None => return self.tys.alloc(Ty::Missing),
+						None => return self.header.tys.alloc(Ty::Missing),
 					};
-				self.tys.alloc(Ty::Named(path))
+				self.header.tys.alloc(Ty::Named(path))
 			}
 			cst::Ty::PointerTy(ty) => {
 				let pointee = self.gen_ty(ty.pointee(self.tree));
-				self.tys.alloc(Ty::Pointer(pointee))
+				self.header.tys.alloc(Ty::Pointer(pointee))
 			}
 		};
 
-		self.ty_ranges.insert(id, ty.range(self.tree));
+		self.header.ty_ranges.insert(id, ty.range(self.tree));
 
 		id
 	}
@@ -126,8 +109,8 @@ impl GenHeaderCtx<'_> {
 
 	fn gen_path_segment(&mut self, ident: cst::Ident) -> Id<String> {
 		let s = ident.text(self.tree).to_string();
-		let id = self.path_segments.alloc(s);
-		self.path_segment_ranges.insert(id, ident.range(self.tree));
+		let id = self.header.path_segments.alloc(s);
+		self.header.path_segment_ranges.insert(id, ident.range(self.tree));
 		id
 	}
 }
