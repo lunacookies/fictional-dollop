@@ -11,6 +11,7 @@ pub type SyntaxElement = eventree::SyntaxElement<TreeConfig>;
 pub enum NodeKind {
 	SourceFile,
 	Strukt,
+	Function,
 	Field,
 	NamedTy,
 	PointerTy,
@@ -24,8 +25,11 @@ pub enum NodeKind {
 #[repr(u8)]
 pub enum TokenKind {
 	StructKw,
+	FnKw,
 	U32Kw,
 	Ident,
+	LParen,
+	RParen,
 	LBrace,
 	RBrace,
 	Star,
@@ -67,8 +71,11 @@ impl fmt::Display for TokenKind {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		let s = match self {
 			TokenKind::StructKw => "`struct`",
+			TokenKind::FnKw => "`fn`",
 			TokenKind::U32Kw => "`u32`",
 			TokenKind::Ident => "identifier",
+			TokenKind::LParen => "`(`",
+			TokenKind::RParen => "`)`",
 			TokenKind::LBrace => "`{`",
 			TokenKind::RBrace => "`}`",
 			TokenKind::Star => "`*`",

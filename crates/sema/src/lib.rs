@@ -12,6 +12,7 @@ pub fn nameres(header: &Header, world: &World) -> Vec<Error> {
 					nameres_ty(*field_ty, header, world, &mut errors);
 				}
 			}
+			Item::Function => {}
 		}
 	}
 
@@ -26,6 +27,7 @@ pub struct Error {
 pub enum ErrorKind {
 	UndefinedItem,
 	UndefinedModule,
+	ExpectedTyFoundFunction,
 }
 
 fn nameres_ty(
@@ -38,6 +40,10 @@ fn nameres_ty(
 		Ty::Named(path) => match nameres_path(path, header, world, errors) {
 			Some(item) => match item {
 				Item::Strukt { .. } => {}
+				Item::Function => errors.push(Error {
+					range: *header.ty_ranges.get(ty),
+					kind: ErrorKind::ExpectedTyFoundFunction,
+				}),
 			},
 			None => {}
 		},
@@ -110,6 +116,9 @@ fn run_tests() {
 					}
 					ErrorKind::UndefinedModule => {
 						output.push_str("undefined module")
+					}
+					ErrorKind::ExpectedTyFoundFunction => {
+						output.push_str("expected type, found function")
 					}
 				}
 				output.push('\n');

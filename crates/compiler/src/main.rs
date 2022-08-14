@@ -52,6 +52,12 @@ fn main() -> anyhow::Result<()> {
 				sema::ErrorKind::UndefinedModule => {
 					format!("undefined module `{}`", &content[error.range])
 				}
+				sema::ErrorKind::ExpectedTyFoundFunction => {
+					format!(
+						"expected type, found function `{}`",
+						&content[error.range]
+					)
+				}
 			};
 			let (line, column) =
 				offset_to_line_column(error.range.start(), line_starts);

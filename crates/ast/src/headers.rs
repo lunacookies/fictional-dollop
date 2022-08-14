@@ -20,6 +20,7 @@ pub struct Header {
 
 pub enum Item {
 	Strukt { fields: Vec<(String, Id<Ty>)> },
+	Function,
 }
 
 pub fn gen_header(source_file: cst::SourceFile, tree: &SyntaxTree) -> Header {
@@ -45,6 +46,7 @@ impl GenHeaderCtx<'_> {
 	fn gen_item(&mut self, item: cst::Item) -> Option<(String, Item)> {
 		match item {
 			cst::Item::Strukt(s) => self.gen_strukt(s),
+			cst::Item::Function(f) => self.gen_function(f),
 		}
 	}
 
@@ -65,6 +67,14 @@ impl GenHeaderCtx<'_> {
 		}
 
 		Some((name.to_string(), Item::Strukt { fields }))
+	}
+
+	fn gen_function(
+		&mut self,
+		function: cst::Function,
+	) -> Option<(String, Item)> {
+		let name = function.name(self.tree)?.text(self.tree);
+		Some((name.to_string(), Item::Function))
 	}
 
 	fn gen_ty(&mut self, ty: Option<cst::Ty>) -> Id<Ty> {
@@ -165,6 +175,11 @@ impl PrettyPrintHeaderCtx<'_> {
 					}
 					self.s.push_str("\n}");
 				}
+			}
+			Item::Function => {
+				self.s.push_str("fn ");
+				self.s.push_str(name);
+				self.s.push_str("() {}");
 			}
 		}
 	}

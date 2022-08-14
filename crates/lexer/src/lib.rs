@@ -33,11 +33,20 @@ enum LogosTokenKind {
 	#[token("struct")]
 	StructKw,
 
+	#[token("fn")]
+	FnKw,
+
 	#[token("u32")]
 	U32Kw,
 
 	#[regex("[a-z][a-z0-9]*")]
 	Ident,
+
+	#[token("(")]
+	LParen,
+
+	#[token(")")]
+	RParen,
 
 	#[token("{")]
 	LBrace,
@@ -101,11 +110,13 @@ mod tests {
 	#[test]
 	fn keywords() {
 		check(
-			"struct u32",
+			"struct fn u32",
 			expect![["
 				StructKw@0..6
 				Whitespace@6..7
-				U32Kw@7..10"]],
+				FnKw@7..9
+				Whitespace@9..10
+				U32Kw@10..13"]],
 		);
 	}
 
@@ -125,10 +136,12 @@ mod tests {
 	#[test]
 	fn delimiters() {
 		check(
-			"{}",
+			"(){}",
 			expect![["
-				LBrace@0..1
-				RBrace@1..2"]],
+				LParen@0..1
+				RParen@1..2
+				LBrace@2..3
+				RBrace@3..4"]],
 		);
 	}
 

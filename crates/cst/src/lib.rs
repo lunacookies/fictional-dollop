@@ -88,9 +88,10 @@ macro_rules! define_token {
 }
 
 define_node!(SourceFile);
-define_compound_node!(Item, kinds: [Strukt]);
+define_compound_node!(Item, kinds: [Strukt, Function]);
 define_node!(Strukt);
 define_node!(Field);
+define_node!(Function);
 define_compound_node!(Ty, kinds: [NamedTy, PointerTy, PrimitiveTy]);
 define_node!(NamedTy);
 define_node!(PointerTy);
@@ -126,6 +127,12 @@ impl Field {
 
 	pub fn ty(self, tree: &SyntaxTree) -> Option<Ty> {
 		node(self, tree)
+	}
+}
+
+impl Function {
+	pub fn name(self, tree: &SyntaxTree) -> Option<Ident> {
+		token(self, tree)
 	}
 }
 

@@ -14,6 +14,7 @@ pub(crate) fn source_file(p: &mut Parser) {
 fn opt_item(p: &mut Parser) {
 	match p.peek() {
 		Some(TokenKind::StructKw) => strukt(p),
+		Some(TokenKind::FnKw) => function(p),
 		Some(_) => p.error_without_recovery("item"),
 		None => unreachable!(),
 	}
@@ -36,6 +37,17 @@ fn strukt(p: &mut Parser) {
 		}
 	}
 
+	p.expect(TokenKind::RBrace);
+	p.finish_node();
+}
+
+fn function(p: &mut Parser) {
+	p.start_node(NodeKind::Function);
+	p.bump(TokenKind::FnKw);
+	p.expect(TokenKind::Ident);
+	p.expect(TokenKind::LParen);
+	p.expect(TokenKind::RParen);
+	p.expect(TokenKind::LBrace);
 	p.expect(TokenKind::RBrace);
 	p.finish_node();
 }
