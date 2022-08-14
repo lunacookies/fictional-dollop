@@ -36,11 +36,17 @@ enum LogosTokenKind {
 	#[token("fn")]
 	FnKw,
 
+	#[token("var")]
+	VarKw,
+
 	#[token("u32")]
 	U32Kw,
 
 	#[regex("[a-z][a-z0-9]*")]
 	Ident,
+
+	#[regex("[0-9]+")]
+	Integer,
 
 	#[token("(")]
 	LParen,
@@ -53,6 +59,9 @@ enum LogosTokenKind {
 
 	#[token("}")]
 	RBrace,
+
+	#[token("=")]
+	Eq,
 
 	#[token("*")]
 	Star,
@@ -110,13 +119,15 @@ mod tests {
 	#[test]
 	fn keywords() {
 		check(
-			"struct fn u32",
+			"struct fn var u32",
 			expect![["
 				StructKw@0..6
 				Whitespace@6..7
 				FnKw@7..9
 				Whitespace@9..10
-				U32Kw@10..13"]],
+				VarKw@10..13
+				Whitespace@13..14
+				U32Kw@14..17"]],
 		);
 	}
 
@@ -130,6 +141,17 @@ mod tests {
 				Ident@2..5
 				Whitespace@5..6
 				Ident@6..10"]],
+		);
+	}
+
+	#[test]
+	fn integer() {
+		check(
+			"1 1234",
+			expect![["
+				Integer@0..1
+				Whitespace@1..2
+				Integer@2..6"]],
 		);
 	}
 
@@ -148,11 +170,12 @@ mod tests {
 	#[test]
 	fn symbols() {
 		check(
-			"*,.",
+			"=*,.",
 			expect![["
-				Star@0..1
-				Comma@1..2
-				Dot@2..3"]],
+				Eq@0..1
+				Star@1..2
+				Comma@2..3
+				Dot@3..4"]],
 		);
 	}
 }

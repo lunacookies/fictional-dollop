@@ -1,0 +1,38 @@
+fn a() {
+	var x = 10
+	var y = 20
+}
+# ---
+# SourceFile@0..35
+#   Function@0..34
+#     FnKw@0..2 "fn"
+#     Whitespace@2..3 " "
+#     Ident@3..4 "a"
+#     LParen@4..5 "("
+#     RParen@5..6 ")"
+#     Whitespace@6..7 " "
+#     Block@7..34
+#       LBrace@7..8 "{"
+#       Whitespace@8..10 "\n\t"
+#       VarStmt@10..20
+#         VarKw@10..13 "var"
+#         Whitespace@13..14 " "
+#         Ident@14..15 "x"
+#         Whitespace@15..16 " "
+#         Eq@16..17 "="
+#         Whitespace@17..18 " "
+#         IntegerExpr@18..20
+#           Integer@18..20 "10"
+#       Whitespace@20..22 "\n\t"
+#       VarStmt@22..32
+#         VarKw@22..25 "var"
+#         Whitespace@25..26 " "
+#         Ident@26..27 "y"
+#         Whitespace@27..28 " "
+#         Eq@28..29 "="
+#         Whitespace@29..30 " "
+#         IntegerExpr@30..32
+#           Integer@30..32 "20"
+#       Whitespace@32..33 "\n"
+#       RBrace@33..34 "}"
+#   Whitespace@34..35 "\n"

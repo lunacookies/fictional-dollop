@@ -1,0 +1,48 @@
+fn a() {
+	@
+	var n = 0
+	`
+	var m = 1
+}
+# ---
+# SourceFile@0..39
+#   Function@0..38
+#     FnKw@0..2 "fn"
+#     Whitespace@2..3 " "
+#     Ident@3..4 "a"
+#     LParen@4..5 "("
+#     RParen@5..6 ")"
+#     Whitespace@6..7 " "
+#     Block@7..38
+#       LBrace@7..8 "{"
+#       Whitespace@8..10 "\n\t"
+#       Error@10..11
+#         Error@10..11 "@"
+#       Whitespace@11..13 "\n\t"
+#       VarStmt@13..22
+#         VarKw@13..16 "var"
+#         Whitespace@16..17 " "
+#         Ident@17..18 "n"
+#         Whitespace@18..19 " "
+#         Eq@19..20 "="
+#         Whitespace@20..21 " "
+#         IntegerExpr@21..22
+#           Integer@21..22 "0"
+#       Whitespace@22..24 "\n\t"
+#       Error@24..25
+#         Error@24..25 "`"
+#       Whitespace@25..27 "\n\t"
+#       VarStmt@27..36
+#         VarKw@27..30 "var"
+#         Whitespace@30..31 " "
+#         Ident@31..32 "m"
+#         Whitespace@32..33 " "
+#         Eq@33..34 "="
+#         Whitespace@34..35 " "
+#         IntegerExpr@35..36
+#           Integer@35..36 "1"
+#       Whitespace@36..37 "\n"
+#       RBrace@37..38 "}"
+#   Whitespace@38..39 "\n"
+# error at 10..11: expected statement
+# error at 24..25: expected statement
