@@ -4,7 +4,7 @@ struct a { bar foo.x }
 fn x() {}
 # ---
 # foo:
-# 	fn x() {}
+# 	fn x()
 #
 # main:
 # 	struct a {

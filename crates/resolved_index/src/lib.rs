@@ -266,7 +266,7 @@ impl PrettyPrintStubCtx<'_> {
 			Item::Function => {
 				self.s.push_str("fn ");
 				self.s.push_str(name);
-				self.s.push_str("() {}");
+				self.s.push_str("()");
 			}
 		}
 	}
