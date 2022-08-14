@@ -1,0 +1,20 @@
+#- main
+struct foo { first letters.a, second letters.b, third letters.c }
+#- letters
+struct a {}
+struct b {}
+struct c {}
+# ---
+# letters:
+# 	struct a {}
+#
+# 	struct b {}
+#
+# 	struct c {}
+#
+# main:
+# 	struct foo {
+# 		first letters.a,
+# 		second letters.b,
+# 		third letters.c,
+# 	}

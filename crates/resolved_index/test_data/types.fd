@@ -4,5 +4,11 @@ struct a {
 	pointer *foo,
 }
 # ---
+# main:
+# 	struct a {
+# 		named <unknown>,
+# 		pointer *<unknown>,
+# 	}
+#
 # error in main at 18..21: undefined item
 # error in main at 33..36: undefined item

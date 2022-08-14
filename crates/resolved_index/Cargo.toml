@@ -1,11 +1,11 @@
 [package]
 edition = "2021"
-name = "sema"
+name = "resolved_index"
 version = "0.0.0"
 
 [dependencies]
 arena = {path = "../arena"}
-ast = {path = "../ast"}
+raw_index = {path = "../raw_index"}
 text-size = "1.1.0"
 
 [dev-dependencies]

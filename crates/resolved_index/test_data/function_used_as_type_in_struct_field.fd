@@ -3,4 +3,12 @@ struct a { bar foo.x }
 #- foo
 fn x() {}
 # ---
+# foo:
+# 	fn x() {}
+#
+# main:
+# 	struct a {
+# 		bar <unknown>,
+# 	}
+#
 # error in main at 15..20: expected type, found function

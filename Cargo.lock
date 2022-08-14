@@ -13,18 +13,6 @@ name = "arena"
 version = "0.0.0"
 
 [[package]]
-name = "ast"
-version = "0.0.0"
-dependencies = [
- "arena",
- "cst",
- "parser",
- "syntax",
- "test_utils",
- "text-size",
-]
-
-[[package]]
 name = "beef"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -35,9 +23,11 @@ name = "compiler"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "ast",
+ "cst",
  "parser",
- "sema",
+ "raw_index",
+ "resolved_index",
+ "syntax",
  "text-size",
 ]
 
@@ -150,18 +140,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "raw_index"
+version = "0.0.0"
+dependencies = [
+ "arena",
+ "cst",
+ "parser",
+ "syntax",
+ "test_utils",
+ "text-size",
+]
+
+[[package]]
 name = "regex-syntax"
 version = "0.6.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a3f87b73ce11b1619a3c6332f45341e0047173771e8b8b73f87bfeefb7b56244"
 
 [[package]]
-name = "sema"
+name = "resolved_index"
 version = "0.0.0"
 dependencies = [
  "arena",
- "ast",
  "parser",
+ "raw_index",
  "test_utils",
  "text-size",
 ]

@@ -4,8 +4,15 @@ use std::fs;
 use text_size::TextSize;
 
 fn main() -> anyhow::Result<()> {
-	let mut world = ast::World { headers: HashMap::new() };
-	let mut line_starts_map = HashMap::new();
+	let files = read_files()?;
+	let parses = parse(&files);
+	let raw_index = index(&parses);
+	let _resolved_index = resolve(raw_index, &files);
+	Ok(())
+}
+
+fn read_files() -> anyhow::Result<HashMap<String, (String, Vec<u32>)>> {
+	let mut map = HashMap::new();
 
 	for entry in fs::read_dir(".")? {
 		let path = entry?.path();
@@ -13,11 +20,23 @@ fn main() -> anyhow::Result<()> {
 			continue;
 		}
 		let name = path.file_stem().unwrap().to_str().unwrap();
-
 		let content = fs::read_to_string(&path)?;
 		let line_starts = line_starts(&content);
+		map.insert(name.to_string(), (content, line_starts));
+	}
 
-		let parse = parser::parse(&content);
+	Ok(map)
+}
+
+fn parse(
+	files: &HashMap<String, (String, Vec<u32>)>,
+) -> HashMap<String, (cst::SourceFile, syntax::SyntaxTree)> {
+	let mut map = HashMap::new();
+
+	for (name, (content, line_starts)) in files {
+		let parse = parser::parse(content);
+		map.insert(name.clone(), (parse.node, parse.tree));
+
 		for error in parse.errors {
 			let (offset, message) = match error {
 				parser::Error::Expected { range, message } => {
@@ -27,32 +46,50 @@ fn main() -> anyhow::Result<()> {
 					(offset, format!("missing {message}"))
 				}
 			};
-			let (line, column) = offset_to_line_column(offset, &line_starts);
+			let (line, column) = offset_to_line_column(offset, line_starts);
 			println!(
 				"{name}.fd:{}:{}: error: {message}",
 				line + 1,
 				column + 1
 			);
 		}
-
-		let header = ast::gen_header(parse.node, &parse.tree);
-		world.headers.insert(name.to_string(), header);
-		line_starts_map.insert(name.to_string(), (content, line_starts));
 	}
 
-	for (name, header) in &world.headers {
-		let (content, line_starts) = &line_starts_map[name];
-		let errors = sema::nameres(header, &world);
+	map
+}
 
+fn index(
+	parses: &HashMap<String, (cst::SourceFile, syntax::SyntaxTree)>,
+) -> raw_index::Index {
+	let mut index = raw_index::Index { stubs: HashMap::new() };
+	for (name, (source_file, tree)) in parses {
+		let stub = raw_index::run_indexer(*source_file, tree);
+		index.stubs.insert(name.clone(), stub);
+	}
+	index
+}
+
+fn resolve(
+	raw_index: raw_index::Index,
+	files: &HashMap<String, (String, Vec<u32>)>,
+) -> resolved_index::Index {
+	let mut resolved_index = resolved_index::Index { stubs: HashMap::new() };
+
+	for (name, raw_stub) in &raw_index.stubs {
+		let (stub, errors) =
+			resolved_index::resolve_raw_stub(raw_stub, name, &raw_index);
+		resolved_index.stubs.insert(name.clone(), stub);
+
+		let (content, line_starts) = &files[name];
 		for error in errors {
 			let message = match error.kind {
-				sema::ErrorKind::UndefinedItem => {
+				resolved_index::ErrorKind::UndefinedItem => {
 					format!("undefined item `{}`", &content[error.range])
 				}
-				sema::ErrorKind::UndefinedModule => {
+				resolved_index::ErrorKind::UndefinedModule => {
 					format!("undefined module `{}`", &content[error.range])
 				}
-				sema::ErrorKind::ExpectedTyFoundFunction => {
+				resolved_index::ErrorKind::ExpectedTyFoundFunction => {
 					format!(
 						"expected type, found function `{}`",
 						&content[error.range]
@@ -69,7 +106,7 @@ fn main() -> anyhow::Result<()> {
 		}
 	}
 
-	Ok(())
+	resolved_index
 }
 
 fn offset_to_line_column(offset: TextSize, line_starts: &[u32]) -> (u32, u32) {

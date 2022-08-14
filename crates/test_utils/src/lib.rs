@@ -46,9 +46,8 @@ pub fn split_multi_file_fixture(input: &str) -> HashMap<&str, &str> {
 
 	assert!(input.starts_with(FILE_DIVIDER));
 
-	for (idx, _) in input.match_indices(FILE_DIVIDER) {
-		let (file_name, contents) =
-			input[idx + FILE_DIVIDER.len()..].split_once('\n').unwrap();
+	for s in input.split(FILE_DIVIDER).skip(1) {
+		let (file_name, contents) = s.split_once('\n').unwrap();
 		files.insert(file_name, contents);
 	}
 

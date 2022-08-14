@@ -1,4 +1,9 @@
 #- main
 struct a { foo bar }
 # ---
+# main:
+# 	struct a {
+# 		foo <unknown>,
+# 	}
+#
 # error in main at 15..18: undefined item

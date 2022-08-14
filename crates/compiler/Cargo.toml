@@ -5,7 +5,9 @@ version = "0.1.0"
 
 [dependencies]
 anyhow = "1.0.58"
-ast = {path = "../ast"}
+cst = {path = "../cst"}
 parser = {path = "../parser"}
-sema = {path = "../sema"}
+raw_index = {path = "../raw_index"}
+resolved_index = {path = "../resolved_index"}
+syntax = {path = "../syntax"}
 text-size = "1.1.0"
