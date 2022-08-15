@@ -1,0 +1,14 @@
+[package]
+edition = "2021"
+name = "codegen_aarch64"
+version = "0.0.0"
+
+[dependencies]
+mir = {path = "../mir"}
+resolved_index = {path = "../resolved_index"}
+
+[dev-dependencies]
+hir = {path = "../hir"}
+parser = {path = "../parser"}
+raw_index = {path = "../raw_index"}
+test_utils = {path = "../test_utils"}

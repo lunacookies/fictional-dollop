@@ -1,0 +1,55 @@
+#- main
+fn zero() {}
+
+fn one() {
+	var a = 92
+}
+
+fn two() {
+	var x = 10
+	var y = 5
+}
+
+#- other
+fn three() {
+	var foo = 10
+	var bar = 100
+	var baz = 1000
+}
+# ---
+# _main_one:
+# 	sub	sp, sp, #16
+# 	str	x30, [sp, #8]
+# 	mov	x8, #92
+# 	str	x8, [sp, #0]
+# 	ldr	x30, [sp, #8]
+# 	add	sp, sp, #16
+# 	ret
+# _main_two:
+# 	sub	sp, sp, #32
+# 	str	x30, [sp, #16]
+# 	mov	x8, #10
+# 	str	x8, [sp, #0]
+# 	mov	x8, #5
+# 	str	x8, [sp, #8]
+# 	ldr	x30, [sp, #16]
+# 	add	sp, sp, #32
+# 	ret
+# _main_zero:
+# 	sub	sp, sp, #16
+# 	str	x30, [sp, #0]
+# 	ldr	x30, [sp, #0]
+# 	add	sp, sp, #16
+# 	ret
+# _other_three:
+# 	sub	sp, sp, #32
+# 	str	x30, [sp, #24]
+# 	mov	x8, #10
+# 	str	x8, [sp, #0]
+# 	mov	x8, #100
+# 	str	x8, [sp, #8]
+# 	mov	x8, #1000
+# 	str	x8, [sp, #16]
+# 	ldr	x30, [sp, #24]
+# 	add	sp, sp, #32
+# 	ret
