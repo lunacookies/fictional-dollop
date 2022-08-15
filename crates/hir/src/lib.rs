@@ -249,7 +249,7 @@ fn run_tests() {
 			output.push_str("== ");
 			output.push_str(file_name);
 			output.push_str(" ==\n");
-			output.push_str(&pretty_print(&hir));
+			output.push_str(&pretty_print(hir));
 		}
 
 		if errors.values().all(|e| e.is_empty()) {
