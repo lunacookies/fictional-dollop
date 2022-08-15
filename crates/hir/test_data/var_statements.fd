@@ -1,0 +1,33 @@
+#- main
+fn a() {
+	var x = 10
+	var y = 5
+}
+
+fn b() {
+	var foo = 20
+	var bar = 1
+}
+
+#- other
+fn c() {
+	var baz = 99
+	var quux = 70
+}
+# ---
+# == main ==
+# a = {
+# 	var l0 u32 = 10
+# 	var l1 u32 = 5
+# }
+#
+# b = {
+# 	var l2 u32 = 20
+# 	var l3 u32 = 1
+# }
+#
+# == other ==
+# c = {
+# 	var l0 u32 = 99
+# 	var l1 u32 = 70
+# }

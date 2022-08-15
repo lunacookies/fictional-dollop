@@ -58,7 +58,7 @@ fn function(p: &mut Parser) {
 }
 
 fn block(p: &mut Parser) {
-	p.start_node(NodeKind::Block);
+	p.start_node(NodeKind::BlockExpr);
 	p.bump(TokenKind::LBrace);
 
 	while !p.at_recovery() && !p.at(TokenKind::RBrace) {

@@ -11,7 +11,7 @@ fn a() {
 #     LParen@4..5 "("
 #     RParen@5..6 ")"
 #     Whitespace@6..7 " "
-#     Block@7..34
+#     BlockExpr@7..34
 #       LBrace@7..8 "{"
 #       Whitespace@8..10 "\n\t"
 #       VarStmt@10..20

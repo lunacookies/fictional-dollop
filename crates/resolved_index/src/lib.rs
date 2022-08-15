@@ -21,6 +21,7 @@ pub enum Ty {
 	Named(Path),
 	Pointer(Id<Ty>),
 	U32,
+	Void,
 	Unknown,
 }
 
@@ -257,7 +258,7 @@ impl PrettyPrintStubCtx<'_> {
 						self.s.push_str("\n\t");
 						self.s.push_str(field_name);
 						self.s.push(' ');
-						self.ty(self.stub.tys.get(*field_ty));
+						self.ty(*field_ty);
 						self.s.push(',');
 					}
 					self.s.push_str("\n}");
@@ -271,29 +272,24 @@ impl PrettyPrintStubCtx<'_> {
 		}
 	}
 
-	fn ty(&mut self, ty: &Ty) {
-		match ty {
-			Ty::Named(path) => self.path(path),
-			Ty::Pointer(pointee) => {
-				self.s.push('*');
-				self.ty(self.stub.tys.get(*pointee));
-			}
-			Ty::U32 => self.s.push_str("u32"),
-			Ty::Unknown => self.s.push_str("<unknown>"),
-		}
+	fn ty(&mut self, ty: Id<Ty>) {
+		self.s.push_str(&pretty_print_ty(ty, &self.stub.tys));
 	}
+}
 
-	fn path(&mut self, path: &Path) {
-		self.s.push_str(&path.module);
-		self.s.push('.');
-		self.s.push_str(&path.item);
+pub fn pretty_print_ty(ty: Id<Ty>, tys: &Arena<Ty>) -> String {
+	match tys.get(ty) {
+		Ty::Named(path) => format!("{}.{}", path.module, path.item),
+		Ty::Pointer(pointee) => format!("*{}", pretty_print_ty(*pointee, tys)),
+		Ty::U32 => "u32".to_string(),
+		Ty::Void => "void".to_string(),
+		Ty::Unknown => "<unknown>".to_string(),
 	}
 }
 
 #[cfg(test)]
 #[test]
 fn run_tests() {
-	use std::collections::HashMap;
 	use std::fmt::Write;
 
 	test_utils::run_tests(|input| {

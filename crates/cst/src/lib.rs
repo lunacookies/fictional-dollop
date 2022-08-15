@@ -92,6 +92,11 @@ define_compound_node!(Item, kinds: [Strukt, Function]);
 define_node!(Strukt);
 define_node!(Field);
 define_node!(Function);
+define_compound_node!(Stmt, kinds: [VarStmt]);
+define_node!(VarStmt);
+define_compound_node!(Expr, kinds:[BlockExpr,IntegerExpr]);
+define_node!(BlockExpr);
+define_node!(IntegerExpr);
 define_compound_node!(Ty, kinds: [NamedTy, PointerTy, PrimitiveTy]);
 define_node!(NamedTy);
 define_node!(PointerTy);
@@ -133,6 +138,26 @@ impl Field {
 impl Function {
 	pub fn name(self, tree: &SyntaxTree) -> Option<Ident> {
 		token(self, tree)
+	}
+
+	pub fn body(self, tree: &SyntaxTree) -> Option<BlockExpr> {
+		node(self, tree)
+	}
+}
+
+impl VarStmt {
+	pub fn name(self, tree: &SyntaxTree) -> Option<Ident> {
+		token(self, tree)
+	}
+
+	pub fn value(self, tree: &SyntaxTree) -> Option<Expr> {
+		node(self, tree)
+	}
+}
+
+impl BlockExpr {
+	pub fn stmts(self, tree: &SyntaxTree) -> impl Iterator<Item = Stmt> + '_ {
+		nodes(self, tree)
 	}
 }
 

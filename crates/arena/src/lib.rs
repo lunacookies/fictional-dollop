@@ -23,11 +23,21 @@ impl<T> Arena<T> {
 	pub fn get(&self, id: Id<T>) -> &T {
 		&self.0[id.idx as usize]
 	}
+
+	pub fn get_mut(&mut self, id: Id<T>) -> &mut T {
+		&mut self.0[id.idx as usize]
+	}
 }
 
 impl<T> Default for Arena<T> {
 	fn default() -> Arena<T> {
 		Arena::new()
+	}
+}
+
+impl<T> Id<T> {
+	pub fn to_raw(self) -> u32 {
+		self.idx
 	}
 }
 

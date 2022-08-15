@@ -1,0 +1,16 @@
+[package]
+edition = "2021"
+name = "hir"
+version = "0.0.0"
+
+[dependencies]
+arena = {path = "../arena"}
+cst = {path = "../cst"}
+resolved_index = {path = "../resolved_index"}
+syntax = {path = "../syntax"}
+text-size = "1.1.0"
+
+[dev-dependencies]
+parser = {path = "../parser"}
+raw_index = {path = "../raw_index"}
+test_utils = {path = "../test_utils"}

@@ -11,10 +11,10 @@ pub type SyntaxElement = eventree::SyntaxElement<TreeConfig>;
 pub enum NodeKind {
 	SourceFile,
 	Strukt,
-	Function,
 	Field,
-	Block,
+	Function,
 	VarStmt,
+	BlockExpr,
 	IntegerExpr,
 	NamedTy,
 	PointerTy,
