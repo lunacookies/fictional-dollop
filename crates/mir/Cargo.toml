@@ -1,0 +1,14 @@
+[package]
+edition = "2021"
+name = "mir"
+version = "0.0.0"
+
+[dependencies]
+arena = {path = "../arena"}
+hir = {path = "../hir"}
+
+[dev-dependencies]
+parser = {path = "../parser"}
+raw_index = {path = "../raw_index"}
+resolved_index = {path = "../resolved_index"}
+test_utils = {path = "../test_utils"}

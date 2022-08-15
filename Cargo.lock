@@ -119,6 +119,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "mir"
+version = "0.0.0"
+dependencies = [
+ "arena",
+ "hir",
+ "parser",
+ "raw_index",
+ "resolved_index",
+ "test_utils",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

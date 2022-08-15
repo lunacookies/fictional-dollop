@@ -1,0 +1,29 @@
+#- main
+
+fn a() {
+	var x = 92
+	var y = 29
+}
+
+fn b() {
+	var a = 100
+	var b = 200
+}
+
+#- lib
+
+fn x() {
+	var foo = 0
+}
+
+# ---
+# == lib ==
+# x:
+# 	mov	r0, 0
+# == main ==
+# a:
+# 	mov	r0, 92
+# 	mov	r1, 29
+# b:
+# 	mov	r0, 100
+# 	mov	r1, 200
