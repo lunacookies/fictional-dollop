@@ -1,3 +1,4 @@
+use std::fmt;
 use std::marker::PhantomData;
 
 pub struct Arena<T>(Vec<T>);
@@ -55,14 +56,33 @@ impl<K, V> ArenaMap<K, V> {
 		}
 	}
 
-	pub fn get(&self, key: Id<K>) -> &V {
-		self.0[key.idx as usize].as_ref().unwrap()
+	#[track_caller]
+	pub fn get(&self, key: Id<K>) -> Option<&V> {
+		self.0.get(key.idx as usize)?.as_ref()
 	}
 }
 
 impl<K, V> Default for ArenaMap<K, V> {
 	fn default() -> ArenaMap<K, V> {
 		ArenaMap::new()
+	}
+}
+
+impl<K, V> fmt::Debug for ArenaMap<K, V>
+where
+	V: fmt::Debug,
+{
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		let mut debug_map = f.debug_map();
+
+		for (idx, slot) in self.0.iter().enumerate() {
+			if let Some(v) = slot {
+				let id: Id<K> = Id { idx: idx as u32, phantom: PhantomData };
+				debug_map.entry(&id as &dyn fmt::Debug, v);
+			}
+		}
+
+		debug_map.finish()
 	}
 }
 
@@ -73,3 +93,9 @@ impl<T> Clone for Id<T> {
 }
 
 impl<T> Copy for Id<T> {}
+
+impl<T> fmt::Debug for Id<T> {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		write!(f, "Id::<{}>({})", std::any::type_name::<T>(), self.idx)
+	}
+}

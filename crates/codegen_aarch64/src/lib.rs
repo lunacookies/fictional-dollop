@@ -48,12 +48,7 @@ impl Ctx<'_> {
 		write!(self.asm, "\n\tstr\tx30, [sp, #{largest_offset_used}]")
 			.unwrap();
 		for instr in instrs {
-			match *instr {
-				mir::Instr::MovImm { reg, value } => {
-					self.write_imm_to_scratch(value);
-					self.store_scratch_to_stack(reg_map[&reg]);
-				}
-			}
+			self.instr(instr, &reg_map);
 		}
 		write!(self.asm, "\n\tldr\tx30, [sp, #{largest_offset_used}]")
 			.unwrap();
@@ -61,6 +56,23 @@ impl Ctx<'_> {
 		write!(self.asm, "\n\tret").unwrap();
 
 		self.asm
+	}
+
+	fn instr(&mut self, instr: &Instr, reg_map: &HashMap<u32, u32>) {
+		match *instr {
+			mir::Instr::MovImm { dst, imm } => {
+				self.write_imm_to_scratch(imm);
+				self.store_scratch_to_stack(reg_map[&dst]);
+			}
+			mir::Instr::MovReg { dst, src } => {
+				self.load_stack_to_scratch(reg_map[&src]);
+				self.store_scratch_to_stack(reg_map[&dst]);
+			}
+		}
+	}
+
+	fn load_stack_to_scratch(&mut self, offset: u32) {
+		write!(self.asm, "\n\tldr\tx8, [sp, #{offset}]").unwrap();
 	}
 
 	fn store_scratch_to_stack(&mut self, offset: u32) {
@@ -86,13 +98,19 @@ fn stack_alloc(instrs: &[Instr]) -> (HashMap<u32, u32>, u32) {
 	let mut map = HashMap::new();
 	let mut current_offset = 0;
 
+	let mut handle_reg = |reg| {
+		if let Entry::Vacant(e) = map.entry(reg) {
+			e.insert(current_offset);
+			current_offset += 8;
+		}
+	};
+
 	for instr in instrs {
 		match *instr {
-			Instr::MovImm { reg, .. } => {
-				if let Entry::Vacant(e) = map.entry(reg) {
-					e.insert(current_offset);
-					current_offset += 8;
-				}
+			Instr::MovImm { dst, imm: _ } => handle_reg(dst),
+			Instr::MovReg { dst, src } => {
+				handle_reg(dst);
+				handle_reg(src);
 			}
 		}
 	}

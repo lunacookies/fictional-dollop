@@ -1,0 +1,10 @@
+#- main
+fn f() {
+	var x = abc
+}
+# ---
+# == main ==
+# f = {
+# 	var l0 <unknown> = ?
+# }
+# error in main at 18..21: undefined variable

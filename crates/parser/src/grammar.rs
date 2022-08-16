@@ -77,7 +77,12 @@ fn expr(p: &mut Parser) {
 	match p.peek() {
 		Some(TokenKind::Integer) => {
 			p.start_node(NodeKind::IntegerExpr);
-			p.expect(TokenKind::Integer);
+			p.bump(TokenKind::Integer);
+			p.finish_node();
+		}
+		Some(TokenKind::Ident) => {
+			p.start_node(NodeKind::VariableExpr);
+			p.bump(TokenKind::Ident);
 			p.finish_node();
 		}
 		Some(TokenKind::LBrace) => block(p),

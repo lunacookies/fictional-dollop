@@ -1,5 +1,5 @@
-use arena::Id;
-use hir::{Expr, Hir, Stmt};
+use arena::{ArenaMap, Id};
+use hir::{Expr, Hir, LocalDef, Stmt};
 use std::collections::HashMap;
 use std::fmt::Write;
 
@@ -10,7 +10,8 @@ pub struct Mir {
 
 #[derive(Clone, Copy)]
 pub enum Instr {
-	MovImm { reg: u32, value: u32 },
+	MovImm { dst: u32, imm: u32 },
+	MovReg { dst: u32, src: u32 },
 }
 
 pub fn build_mir(hir: &Hir) -> Mir {
@@ -18,6 +19,7 @@ pub fn build_mir(hir: &Hir) -> Mir {
 		mir: Mir { map: HashMap::new(), instrs: Vec::new() },
 		hir,
 		current_reg: 0,
+		locals: ArenaMap::new(),
 	};
 
 	for (name, body) in &hir.map {
@@ -30,6 +32,7 @@ struct BuildCtx<'a> {
 	mir: Mir,
 	hir: &'a Hir,
 	current_reg: u32,
+	locals: ArenaMap<LocalDef, u32>,
 }
 
 impl BuildCtx<'_> {
@@ -45,24 +48,40 @@ impl BuildCtx<'_> {
 		match stmt {
 			Stmt::LocalDef(local_def_id) => {
 				let local_def = self.hir.local_defs.get(local_def_id);
-				self.expr(local_def.value);
+				match self.expr(local_def.value) {
+					BuildExprResult::UsedNewReg(reg) => {
+						self.locals.insert(local_def_id, reg);
+					}
+					BuildExprResult::ReferenceExistingReg(reg) => {
+						let new_reg = self.reg();
+						self.emit(Instr::MovReg { dst: new_reg, src: reg });
+						self.locals.insert(local_def_id, new_reg);
+					}
+					BuildExprResult::ZeroSized => {}
+				}
 			}
 		}
 	}
 
-	fn expr(&mut self, expr: Id<Expr>) -> Option<u32> {
+	fn expr(&mut self, expr: Id<Expr>) -> BuildExprResult {
 		match self.hir.exprs.get(expr) {
-			Expr::Missing => None,
+			Expr::Missing => BuildExprResult::ZeroSized,
 			Expr::Integer(i) => {
 				let reg = self.reg();
-				self.emit(Instr::MovImm { reg, value: *i });
-				Some(reg)
+				self.emit(Instr::MovImm { dst: reg, imm: *i });
+				BuildExprResult::UsedNewReg(reg)
+			}
+			Expr::Local(local_def_id) => {
+				match self.locals.get(*local_def_id) {
+					Some(reg) => BuildExprResult::ReferenceExistingReg(*reg),
+					None => BuildExprResult::ZeroSized,
+				}
 			}
 			Expr::Block(stmts) => {
 				for stmt in stmts {
 					self.stmt(*stmt);
 				}
-				None
+				BuildExprResult::ZeroSized
 			}
 		}
 	}
@@ -76,6 +95,12 @@ impl BuildCtx<'_> {
 		self.current_reg += 1;
 		r
 	}
+}
+
+enum BuildExprResult {
+	UsedNewReg(u32),
+	ReferenceExistingReg(u32),
+	ZeroSized,
 }
 
 pub fn pretty_print(mir: &Mir) -> String {
@@ -112,8 +137,11 @@ impl PrettyPrintCtx<'_> {
 
 	fn instr(&mut self, instr: Instr) {
 		match instr {
-			Instr::MovImm { reg: register, value } => {
-				write!(self.output, "mov\tr{register}, {value}")
+			Instr::MovImm { dst, imm } => {
+				write!(self.output, "mov\tr{dst}, {imm}")
+			}
+			Instr::MovReg { dst, src } => {
+				write!(self.output, "mov\tr{dst}, r{src}")
 			}
 		}
 		.unwrap()

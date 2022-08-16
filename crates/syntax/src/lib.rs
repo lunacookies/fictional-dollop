@@ -15,6 +15,7 @@ pub enum NodeKind {
 	Function,
 	VarStmt,
 	BlockExpr,
+	VariableExpr,
 	IntegerExpr,
 	NamedTy,
 	PointerTy,

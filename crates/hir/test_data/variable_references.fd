@@ -1,0 +1,15 @@
+#- main
+fn x() {
+	var a = 1
+	var b = a
+	var c = {}
+	var d = c
+}
+# ---
+# == main ==
+# x = {
+# 	var l0 u32 = 1
+# 	var l1 u32 = l0
+# 	var l2 void = {}
+# 	var l3 void = l2
+# }

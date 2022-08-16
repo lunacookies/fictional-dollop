@@ -1,16 +1,23 @@
 use arena::{Arena, Id};
 use cst::{CstNode, CstToken};
+use resolved_index::{Stub, Ty};
 use std::collections::HashMap;
+use std::fmt::Write;
 use syntax::SyntaxTree;
 use text_size::TextRange;
 
 pub fn lower(
-	stub: &resolved_index::Stub,
+	stub: &Stub,
 	source_file: cst::SourceFile,
 	tree: &SyntaxTree,
 ) -> (Hir, Vec<Error>) {
-	let mut ctx =
-		LowerCtx { stub, tree, hir: Hir::default(), errors: Vec::new() };
+	let mut ctx = LowerCtx {
+		stub,
+		tree,
+		hir: Hir::default(),
+		scopes: Vec::new(),
+		errors: Vec::new(),
+	};
 
 	for item in source_file.items(tree) {
 		let (name, body) = match item {
@@ -35,7 +42,7 @@ pub struct Hir {
 	pub map: HashMap<String, Id<Expr>>,
 	pub exprs: Arena<Expr>,
 	pub local_defs: Arena<LocalDef>,
-	pub tys: Arena<resolved_index::Ty>,
+	pub tys: Arena<Ty>,
 }
 
 #[derive(Clone, Copy)]
@@ -44,13 +51,14 @@ pub enum Stmt {
 }
 
 pub struct LocalDef {
-	pub ty: Id<resolved_index::Ty>,
+	pub ty: Id<Ty>,
 	pub value: Id<Expr>,
 }
 
 pub enum Expr {
 	Missing,
 	Integer(u32),
+	Local(Id<LocalDef>),
 	Block(Vec<Stmt>),
 }
 
@@ -59,12 +67,15 @@ pub struct Error {
 	pub range: TextRange,
 }
 
-pub enum ErrorKind {}
+pub enum ErrorKind {
+	UndefinedVariable,
+}
 
 struct LowerCtx<'a> {
-	stub: &'a resolved_index::Stub,
+	stub: &'a Stub,
 	tree: &'a SyntaxTree,
 	hir: Hir,
+	scopes: Vec<HashMap<String, Id<LocalDef>>>,
 	errors: Vec<Error>,
 }
 
@@ -80,49 +91,77 @@ impl LowerCtx<'_> {
 				let (value, ty) = self.expr(var.value(self.tree));
 				let local_def_id =
 					self.hir.local_defs.alloc(LocalDef { ty, value });
+
+				if let Some(ident) = var.name(self.tree) {
+					let name = ident.text(self.tree);
+					self.scopes
+						.last_mut()
+						.unwrap()
+						.insert(name.to_string(), local_def_id);
+				}
+
 				Stmt::LocalDef(local_def_id)
 			}
 		}
 	}
 
-	fn expr(
-		&mut self,
-		expr: Option<cst::Expr>,
-	) -> (Id<Expr>, Id<resolved_index::Ty>) {
+	fn expr(&mut self, expr: Option<cst::Expr>) -> (Id<Expr>, Id<Ty>) {
 		let expr = match expr {
 			Some(e) => e,
 			None => {
 				return (
 					self.hir.exprs.alloc(Expr::Missing),
-					self.hir.tys.alloc(resolved_index::Ty::Unknown),
+					self.hir.tys.alloc(Ty::Unknown),
 				)
 			}
 		};
 
 		let (expr, ty) = match expr {
 			cst::Expr::BlockExpr(block) => self.block_expr(block),
+			cst::Expr::VariableExpr(variable) => self.variable_expr(variable),
 			cst::Expr::IntegerExpr(integer) => self.integer_expr(integer),
 		};
 		(self.hir.exprs.alloc(expr), ty)
 	}
 
-	fn block_expr(
-		&mut self,
-		block: cst::BlockExpr,
-	) -> (Expr, Id<resolved_index::Ty>) {
+	fn block_expr(&mut self, block: cst::BlockExpr) -> (Expr, Id<Ty>) {
+		self.scopes.push(HashMap::new());
 		let mut stmts = Vec::new();
 		for stmt in block.stmts(self.tree) {
 			stmts.push(self.stmt(stmt));
 		}
-		(Expr::Block(stmts), self.hir.tys.alloc(resolved_index::Ty::Void))
+		self.scopes.pop();
+		(Expr::Block(stmts), self.hir.tys.alloc(Ty::Void))
 	}
 
-	fn integer_expr(
+	fn variable_expr(
 		&mut self,
-		integer: cst::IntegerExpr,
-	) -> (Expr, Id<resolved_index::Ty>) {
+		variable: cst::VariableExpr,
+	) -> (Expr, Id<Ty>) {
+		let name = variable.text(self.tree);
+
+		for scope in self.scopes.iter().rev() {
+			let local_def_id = match scope.get(name) {
+				Some(id) => *id,
+				None => continue,
+			};
+
+			return (
+				Expr::Local(local_def_id),
+				self.hir.local_defs.get(local_def_id).ty,
+			);
+		}
+
+		self.errors.push(Error {
+			kind: ErrorKind::UndefinedVariable,
+			range: variable.range(self.tree),
+		});
+		(Expr::Missing, self.hir.tys.alloc(Ty::Unknown))
+	}
+
+	fn integer_expr(&mut self, integer: cst::IntegerExpr) -> (Expr, Id<Ty>) {
 		let value = integer.text(self.tree).parse().unwrap();
-		(Expr::Integer(value), self.hir.tys.alloc(resolved_index::Ty::U32))
+		(Expr::Integer(value), self.hir.tys.alloc(Ty::U32))
 	}
 }
 
@@ -177,6 +216,9 @@ impl PrettyPrintCtx<'_> {
 		match self.hir.exprs.get(expr) {
 			Expr::Missing => self.output.push('?'),
 			Expr::Integer(n) => self.output.push_str(&n.to_string()),
+			Expr::Local(local_def_id) => {
+				write!(self.output, "l{}", local_def_id.to_raw()).unwrap()
+			}
 			Expr::Block(stmts) => self.block_expr(stmts),
 		}
 	}
@@ -273,7 +315,11 @@ fn run_tests() {
 					error.range
 				)
 				.unwrap();
-				match error.kind {}
+				match error.kind {
+					ErrorKind::UndefinedVariable => {
+						output.push_str("undefined variable")
+					}
+				}
 			}
 		}
 

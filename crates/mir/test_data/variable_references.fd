@@ -1,0 +1,13 @@
+#- main
+fn f() {
+	var a = {
+		var x = 123
+		var y = x
+	}
+	var b = a
+}
+# ---
+# == main ==
+# f:
+# 	mov	r0, 123
+# 	mov	r1, r0

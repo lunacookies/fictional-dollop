@@ -1,0 +1,38 @@
+fn main() {
+	var a = 5
+	var b = a
+}
+# ---
+# SourceFile@0..36
+#   Function@0..35
+#     FnKw@0..2 "fn"
+#     Whitespace@2..3 " "
+#     Ident@3..7 "main"
+#     LParen@7..8 "("
+#     RParen@8..9 ")"
+#     Whitespace@9..10 " "
+#     BlockExpr@10..35
+#       LBrace@10..11 "{"
+#       Whitespace@11..13 "\n\t"
+#       VarStmt@13..22
+#         VarKw@13..16 "var"
+#         Whitespace@16..17 " "
+#         Ident@17..18 "a"
+#         Whitespace@18..19 " "
+#         Eq@19..20 "="
+#         Whitespace@20..21 " "
+#         IntegerExpr@21..22
+#           Integer@21..22 "5"
+#       Whitespace@22..24 "\n\t"
+#       VarStmt@24..33
+#         VarKw@24..27 "var"
+#         Whitespace@27..28 " "
+#         Ident@28..29 "b"
+#         Whitespace@29..30 " "
+#         Eq@30..31 "="
+#         Whitespace@31..32 " "
+#         VariableExpr@32..33
+#           Ident@32..33 "a"
+#       Whitespace@33..34 "\n"
+#       RBrace@34..35 "}"
+#   Whitespace@35..36 "\n"

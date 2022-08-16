@@ -103,7 +103,7 @@ impl Resolver<'_> {
 					}
 					raw_index::Item::Function => {
 						self.errors.push(Error {
-							range: *self.raw_stub.ty_ranges.get(ty),
+							range: *self.raw_stub.ty_ranges.get(ty).unwrap(),
 							kind: ErrorKind::ExpectedTyFoundFunction,
 						});
 						self.resolved_stub.tys.alloc(Ty::Unknown)
@@ -148,10 +148,10 @@ impl Resolver<'_> {
 				Some((path, item))
 			}
 			None => {
-				self.errors.push(Error {
-					range: *self.raw_stub.path_segment_ranges.get(item),
-					kind: ErrorKind::UndefinedItem,
-				});
+				let range =
+					*self.raw_stub.path_segment_ranges.get(item).unwrap();
+				self.errors
+					.push(Error { range, kind: ErrorKind::UndefinedItem });
 				None
 			}
 		}
@@ -167,10 +167,10 @@ impl Resolver<'_> {
 		let raw_stub_of_module = match self.raw_index.stubs.get(module_text) {
 			Some(s) => s,
 			None => {
-				self.errors.push(Error {
-					range: *self.raw_stub.path_segment_ranges.get(module),
-					kind: ErrorKind::UndefinedModule,
-				});
+				let range =
+					*self.raw_stub.path_segment_ranges.get(module).unwrap();
+				self.errors
+					.push(Error { range, kind: ErrorKind::UndefinedModule });
 				return None;
 			}
 		};
@@ -185,10 +185,10 @@ impl Resolver<'_> {
 				Some((path, item))
 			}
 			None => {
-				self.errors.push(Error {
-					range: *self.raw_stub.path_segment_ranges.get(item),
-					kind: ErrorKind::UndefinedItem,
-				});
+				let range =
+					*self.raw_stub.path_segment_ranges.get(item).unwrap();
+				self.errors
+					.push(Error { range, kind: ErrorKind::UndefinedItem });
 				None
 			}
 		}

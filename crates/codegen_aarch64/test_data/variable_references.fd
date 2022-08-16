@@ -1,0 +1,18 @@
+#- main
+fn main() {
+	var x = 64
+	var y = x
+	var z = {}
+	var w = z
+}
+# ---
+# _main_main:
+# 	sub	sp, sp, #32
+# 	str	x30, [sp, #16]
+# 	mov	x8, #64
+# 	str	x8, [sp, #0]
+# 	ldr	x8, [sp, #0]
+# 	str	x8, [sp, #8]
+# 	ldr	x30, [sp, #16]
+# 	add	sp, sp, #32
+# 	ret

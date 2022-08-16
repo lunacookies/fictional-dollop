@@ -1,0 +1,25 @@
+#- main
+fn a() {
+	var a = {
+		var x = 1
+	}
+	var b = x
+}
+
+fn b() {
+	var c = b
+}
+# ---
+# == main ==
+# a = {
+# 	var l1 void = {
+# 		var l0 u32 = 1
+# 	}
+# 	var l2 <unknown> = ?
+# }
+#
+# b = {
+# 	var l3 <unknown> = ?
+# }
+# error in main at 44..45: undefined variable
+# error in main at 67..68: undefined variable
