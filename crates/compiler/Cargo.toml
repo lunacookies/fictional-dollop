@@ -5,7 +5,10 @@ version = "0.1.0"
 
 [dependencies]
 anyhow = "1.0.58"
+codegen_aarch64 = {path = "../codegen_aarch64"}
 cst = {path = "../cst"}
+hir = {path = "../hir"}
+mir = {path = "../mir"}
 parser = {path = "../parser"}
 raw_index = {path = "../raw_index"}
 resolved_index = {path = "../resolved_index"}
