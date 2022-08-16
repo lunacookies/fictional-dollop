@@ -1,0 +1,63 @@
+fn f() {
+	var x = {
+		var a = 5
+		var b = 10
+		var c = 15
+	}
+}
+# ---
+# SourceFile@0..63
+#   Function@0..62
+#     FnKw@0..2 "fn"
+#     Whitespace@2..3 " "
+#     Ident@3..4 "f"
+#     LParen@4..5 "("
+#     RParen@5..6 ")"
+#     Whitespace@6..7 " "
+#     BlockExpr@7..62
+#       LBrace@7..8 "{"
+#       Whitespace@8..10 "\n\t"
+#       VarStmt@10..60
+#         VarKw@10..13 "var"
+#         Whitespace@13..14 " "
+#         Ident@14..15 "x"
+#         Whitespace@15..16 " "
+#         Eq@16..17 "="
+#         Whitespace@17..18 " "
+#         BlockExpr@18..60
+#           LBrace@18..19 "{"
+#           Whitespace@19..22 "\n\t\t"
+#           VarStmt@22..31
+#             VarKw@22..25 "var"
+#             Whitespace@25..26 " "
+#             Ident@26..27 "a"
+#             Whitespace@27..28 " "
+#             Eq@28..29 "="
+#             Whitespace@29..30 " "
+#             IntegerExpr@30..31
+#               Integer@30..31 "5"
+#           Whitespace@31..34 "\n\t\t"
+#           VarStmt@34..44
+#             VarKw@34..37 "var"
+#             Whitespace@37..38 " "
+#             Ident@38..39 "b"
+#             Whitespace@39..40 " "
+#             Eq@40..41 "="
+#             Whitespace@41..42 " "
+#             IntegerExpr@42..44
+#               Integer@42..44 "10"
+#           Whitespace@44..47 "\n\t\t"
+#           VarStmt@47..57
+#             VarKw@47..50 "var"
+#             Whitespace@50..51 " "
+#             Ident@51..52 "c"
+#             Whitespace@52..53 " "
+#             Eq@53..54 "="
+#             Whitespace@54..55 " "
+#             IntegerExpr@55..57
+#               Integer@55..57 "15"
+#           Whitespace@57..59 "\n\t"
+#           RBrace@59..60 "}"
+#       Whitespace@60..61 "\n"
+#       RBrace@61..62 "}"
+#   Whitespace@62..63 "\n"

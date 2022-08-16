@@ -1,0 +1,15 @@
+#- main
+fn x() {
+	var d = {
+		var a = 1
+		var b = 2
+		var c = 3
+	}
+	var e = {}
+}
+# ---
+# == main ==
+# x:
+# 	mov	r0, 1
+# 	mov	r1, 2
+# 	mov	r2, 3

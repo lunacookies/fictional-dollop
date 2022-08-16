@@ -1,0 +1,19 @@
+#- main
+fn f() {
+	var empty = {}
+	var two = {
+		var x = 1
+		var y = 2
+	}
+}
+# ---
+# _main_f:
+# 	sub	sp, sp, #32
+# 	str	x30, [sp, #16]
+# 	mov	x8, #1
+# 	str	x8, [sp, #0]
+# 	mov	x8, #2
+# 	str	x8, [sp, #8]
+# 	ldr	x30, [sp, #16]
+# 	add	sp, sp, #32
+# 	ret

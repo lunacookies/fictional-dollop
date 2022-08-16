@@ -1,0 +1,13 @@
+#- main
+fn main() {
+	var a = {}
+	var b = { var x = 0 }
+}
+# ---
+# == main ==
+# main = {
+# 	var l0 void = {}
+# 	var l2 void = {
+# 		var l1 u32 = 0
+# 	}
+# }

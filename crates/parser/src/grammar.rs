@@ -57,18 +57,6 @@ fn function(p: &mut Parser) {
 	p.finish_node();
 }
 
-fn block(p: &mut Parser) {
-	p.start_node(NodeKind::BlockExpr);
-	p.bump(TokenKind::LBrace);
-
-	while !p.at_recovery() && !p.at(TokenKind::RBrace) {
-		stmt(p);
-	}
-
-	p.expect(TokenKind::RBrace);
-	p.finish_node();
-}
-
 fn stmt(p: &mut Parser) {
 	match p.peek() {
 		Some(TokenKind::VarKw) => var_stmt(p),
@@ -86,8 +74,26 @@ fn var_stmt(p: &mut Parser) {
 }
 
 fn expr(p: &mut Parser) {
-	p.start_node(NodeKind::IntegerExpr);
-	p.expect(TokenKind::Integer);
+	match p.peek() {
+		Some(TokenKind::Integer) => {
+			p.start_node(NodeKind::IntegerExpr);
+			p.expect(TokenKind::Integer);
+			p.finish_node();
+		}
+		Some(TokenKind::LBrace) => block(p),
+		_ => p.error("expression"),
+	}
+}
+
+fn block(p: &mut Parser) {
+	p.start_node(NodeKind::BlockExpr);
+	p.bump(TokenKind::LBrace);
+
+	while !p.at_recovery() && !p.at(TokenKind::RBrace) {
+		stmt(p);
+	}
+
+	p.expect(TokenKind::RBrace);
 	p.finish_node();
 }
 

@@ -177,18 +177,25 @@ impl PrettyPrintCtx<'_> {
 		match self.hir.exprs.get(expr) {
 			Expr::Missing => self.output.push('?'),
 			Expr::Integer(n) => self.output.push_str(&n.to_string()),
-			Expr::Block(b) => {
-				self.output.push('{');
-				self.indentation += 1;
-				for stmt in b {
-					self.newline();
-					self.stmt(*stmt);
-				}
-				self.indentation -= 1;
-				self.newline();
-				self.output.push('}');
-			}
+			Expr::Block(stmts) => self.block_expr(stmts),
 		}
+	}
+
+	fn block_expr(&mut self, stmts: &[Stmt]) {
+		if stmts.is_empty() {
+			self.output.push_str("{}");
+			return;
+		}
+
+		self.output.push('{');
+		self.indentation += 1;
+		for stmt in stmts {
+			self.newline();
+			self.stmt(*stmt);
+		}
+		self.indentation -= 1;
+		self.newline();
+		self.output.push('}');
 	}
 
 	fn newline(&mut self) {
