@@ -74,6 +74,48 @@ fn var_stmt(p: &mut Parser) {
 }
 
 fn expr(p: &mut Parser) {
+	expr_bp(p, 0);
+}
+
+fn expr_bp(p: &mut Parser, min_bp: u8) -> Option<usize> {
+	let lhs = lhs(p)?;
+
+	while let Some(k) = p.peek() {
+		let bp = match k {
+			TokenKind::Eq => todo!("assignment"),
+			TokenKind::PipePipe => 1,
+			TokenKind::AndAnd => 2,
+			TokenKind::EqEq
+			| TokenKind::BangEq
+			| TokenKind::Lt
+			| TokenKind::Gt
+			| TokenKind::LtEq
+			| TokenKind::GtEq => 3,
+			TokenKind::Pipe => 4,
+			TokenKind::Caret => 5,
+			TokenKind::And => 6,
+			TokenKind::LtLt | TokenKind::GtGt => 7,
+			TokenKind::Plus | TokenKind::Hyphen => 8,
+			TokenKind::Star | TokenKind::Slash | TokenKind::Percent => 9,
+			_ => break,
+		};
+
+		if bp < min_bp {
+			break;
+		}
+
+		p.events.insert(lhs, crate::Event::StartNode(NodeKind::BinaryExpr));
+		p.bump_any();
+		expr_bp(p, bp + 1);
+		p.finish_node();
+	}
+
+	Some(lhs)
+}
+
+fn lhs(p: &mut Parser) -> Option<usize> {
+	let idx = p.events.len();
+
 	match p.peek() {
 		Some(TokenKind::Integer) => {
 			p.start_node(NodeKind::IntegerExpr);
@@ -86,8 +128,13 @@ fn expr(p: &mut Parser) {
 			p.finish_node();
 		}
 		Some(TokenKind::LBrace) => block(p),
-		_ => p.error("expression"),
+		_ => {
+			p.error("expression");
+			return None;
+		}
 	}
+
+	Some(idx)
 }
 
 fn block(p: &mut Parser) {

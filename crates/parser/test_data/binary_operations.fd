@@ -1,0 +1,346 @@
+fn main() {
+	var arithmetic = 1 + 2 - 3 * 4 / 5 % 6
+	var bits = 5 | 10 & 15 ^ 20 << 25 >> 30
+	var logical = 0==0 || 0!=0 && 0==0
+	var comparison =
+		1 == 2 ||
+		3 != 4 ||
+		5 < 6 ||
+		7 > 8 ||
+		9 <= 10 ||
+		11 >= 12
+}
+
+fn precedence() {
+	var simple = 2 * 3 + 9 * 10
+	var comparisons = 4 == 2 + 2 && 4 == 2 * 2 && 4 == 1 << 2
+	var associativity = 1+2+3+4+5
+}
+# ---
+# SourceFile@0..359
+#   Function@0..218
+#     FnKw@0..2 "fn"
+#     Whitespace@2..3 " "
+#     Ident@3..7 "main"
+#     LParen@7..8 "("
+#     RParen@8..9 ")"
+#     Whitespace@9..10 " "
+#     BlockExpr@10..218
+#       LBrace@10..11 "{"
+#       Whitespace@11..13 "\n\t"
+#       VarStmt@13..51
+#         VarKw@13..16 "var"
+#         Whitespace@16..17 " "
+#         Ident@17..27 "arithmetic"
+#         Whitespace@27..28 " "
+#         Eq@28..29 "="
+#         Whitespace@29..30 " "
+#         BinaryExpr@30..51
+#           BinaryExpr@30..35
+#             IntegerExpr@30..31
+#               Integer@30..31 "1"
+#             Whitespace@31..32 " "
+#             Plus@32..33 "+"
+#             Whitespace@33..34 " "
+#             IntegerExpr@34..35
+#               Integer@34..35 "2"
+#           Whitespace@35..36 " "
+#           Hyphen@36..37 "-"
+#           Whitespace@37..38 " "
+#           BinaryExpr@38..51
+#             BinaryExpr@38..47
+#               BinaryExpr@38..43
+#                 IntegerExpr@38..39
+#                   Integer@38..39 "3"
+#                 Whitespace@39..40 " "
+#                 Star@40..41 "*"
+#                 Whitespace@41..42 " "
+#                 IntegerExpr@42..43
+#                   Integer@42..43 "4"
+#               Whitespace@43..44 " "
+#               Slash@44..45 "/"
+#               Whitespace@45..46 " "
+#               IntegerExpr@46..47
+#                 Integer@46..47 "5"
+#             Whitespace@47..48 " "
+#             Percent@48..49 "%"
+#             Whitespace@49..50 " "
+#             IntegerExpr@50..51
+#               Integer@50..51 "6"
+#       Whitespace@51..53 "\n\t"
+#       VarStmt@53..92
+#         VarKw@53..56 "var"
+#         Whitespace@56..57 " "
+#         Ident@57..61 "bits"
+#         Whitespace@61..62 " "
+#         Eq@62..63 "="
+#         Whitespace@63..64 " "
+#         BinaryExpr@64..92
+#           IntegerExpr@64..65
+#             Integer@64..65 "5"
+#           Whitespace@65..66 " "
+#           Pipe@66..67 "|"
+#           Whitespace@67..68 " "
+#           BinaryExpr@68..92
+#             BinaryExpr@68..75
+#               IntegerExpr@68..70
+#                 Integer@68..70 "10"
+#               Whitespace@70..71 " "
+#               And@71..72 "&"
+#               Whitespace@72..73 " "
+#               IntegerExpr@73..75
+#                 Integer@73..75 "15"
+#             Whitespace@75..76 " "
+#             Caret@76..77 "^"
+#             Whitespace@77..78 " "
+#             BinaryExpr@78..92
+#               BinaryExpr@78..86
+#                 IntegerExpr@78..80
+#                   Integer@78..80 "20"
+#                 Whitespace@80..81 " "
+#                 LtLt@81..83 "<<"
+#                 Whitespace@83..84 " "
+#                 IntegerExpr@84..86
+#                   Integer@84..86 "25"
+#               Whitespace@86..87 " "
+#               GtGt@87..89 ">>"
+#               Whitespace@89..90 " "
+#               IntegerExpr@90..92
+#                 Integer@90..92 "30"
+#       Whitespace@92..94 "\n\t"
+#       VarStmt@94..128
+#         VarKw@94..97 "var"
+#         Whitespace@97..98 " "
+#         Ident@98..105 "logical"
+#         Whitespace@105..106 " "
+#         Eq@106..107 "="
+#         Whitespace@107..108 " "
+#         BinaryExpr@108..128
+#           BinaryExpr@108..112
+#             IntegerExpr@108..109
+#               Integer@108..109 "0"
+#             EqEq@109..111 "=="
+#             IntegerExpr@111..112
+#               Integer@111..112 "0"
+#           Whitespace@112..113 " "
+#           PipePipe@113..115 "||"
+#           Whitespace@115..116 " "
+#           BinaryExpr@116..128
+#             BinaryExpr@116..120
+#               IntegerExpr@116..117
+#                 Integer@116..117 "0"
+#               BangEq@117..119 "!="
+#               IntegerExpr@119..120
+#                 Integer@119..120 "0"
+#             Whitespace@120..121 " "
+#             AndAnd@121..123 "&&"
+#             Whitespace@123..124 " "
+#             BinaryExpr@124..128
+#               IntegerExpr@124..125
+#                 Integer@124..125 "0"
+#               EqEq@125..127 "=="
+#               IntegerExpr@127..128
+#                 Integer@127..128 "0"
+#       Whitespace@128..130 "\n\t"
+#       VarStmt@130..216
+#         VarKw@130..133 "var"
+#         Whitespace@133..134 " "
+#         Ident@134..144 "comparison"
+#         Whitespace@144..145 " "
+#         Eq@145..146 "="
+#         Whitespace@146..149 "\n\t\t"
+#         BinaryExpr@149..216
+#           BinaryExpr@149..202
+#             BinaryExpr@149..189
+#               BinaryExpr@149..178
+#                 BinaryExpr@149..167
+#                   BinaryExpr@149..155
+#                     IntegerExpr@149..150
+#                       Integer@149..150 "1"
+#                     Whitespace@150..151 " "
+#                     EqEq@151..153 "=="
+#                     Whitespace@153..154 " "
+#                     IntegerExpr@154..155
+#                       Integer@154..155 "2"
+#                   Whitespace@155..156 " "
+#                   PipePipe@156..158 "||"
+#                   Whitespace@158..161 "\n\t\t"
+#                   BinaryExpr@161..167
+#                     IntegerExpr@161..162
+#                       Integer@161..162 "3"
+#                     Whitespace@162..163 " "
+#                     BangEq@163..165 "!="
+#                     Whitespace@165..166 " "
+#                     IntegerExpr@166..167
+#                       Integer@166..167 "4"
+#                 Whitespace@167..168 " "
+#                 PipePipe@168..170 "||"
+#                 Whitespace@170..173 "\n\t\t"
+#                 BinaryExpr@173..178
+#                   IntegerExpr@173..174
+#                     Integer@173..174 "5"
+#                   Whitespace@174..175 " "
+#                   Lt@175..176 "<"
+#                   Whitespace@176..177 " "
+#                   IntegerExpr@177..178
+#                     Integer@177..178 "6"
+#               Whitespace@178..179 " "
+#               PipePipe@179..181 "||"
+#               Whitespace@181..184 "\n\t\t"
+#               BinaryExpr@184..189
+#                 IntegerExpr@184..185
+#                   Integer@184..185 "7"
+#                 Whitespace@185..186 " "
+#                 Gt@186..187 ">"
+#                 Whitespace@187..188 " "
+#                 IntegerExpr@188..189
+#                   Integer@188..189 "8"
+#             Whitespace@189..190 " "
+#             PipePipe@190..192 "||"
+#             Whitespace@192..195 "\n\t\t"
+#             BinaryExpr@195..202
+#               IntegerExpr@195..196
+#                 Integer@195..196 "9"
+#               Whitespace@196..197 " "
+#               LtEq@197..199 "<="
+#               Whitespace@199..200 " "
+#               IntegerExpr@200..202
+#                 Integer@200..202 "10"
+#           Whitespace@202..203 " "
+#           PipePipe@203..205 "||"
+#           Whitespace@205..208 "\n\t\t"
+#           BinaryExpr@208..216
+#             IntegerExpr@208..210
+#               Integer@208..210 "11"
+#             Whitespace@210..211 " "
+#             GtEq@211..213 ">="
+#             Whitespace@213..214 " "
+#             IntegerExpr@214..216
+#               Integer@214..216 "12"
+#       Whitespace@216..217 "\n"
+#       RBrace@217..218 "}"
+#   Whitespace@218..220 "\n\n"
+#   Function@220..358
+#     FnKw@220..222 "fn"
+#     Whitespace@222..223 " "
+#     Ident@223..233 "precedence"
+#     LParen@233..234 "("
+#     RParen@234..235 ")"
+#     Whitespace@235..236 " "
+#     BlockExpr@236..358
+#       LBrace@236..237 "{"
+#       Whitespace@237..239 "\n\t"
+#       VarStmt@239..266
+#         VarKw@239..242 "var"
+#         Whitespace@242..243 " "
+#         Ident@243..249 "simple"
+#         Whitespace@249..250 " "
+#         Eq@250..251 "="
+#         Whitespace@251..252 " "
+#         BinaryExpr@252..266
+#           BinaryExpr@252..257
+#             IntegerExpr@252..253
+#               Integer@252..253 "2"
+#             Whitespace@253..254 " "
+#             Star@254..255 "*"
+#             Whitespace@255..256 " "
+#             IntegerExpr@256..257
+#               Integer@256..257 "3"
+#           Whitespace@257..258 " "
+#           Plus@258..259 "+"
+#           Whitespace@259..260 " "
+#           BinaryExpr@260..266
+#             IntegerExpr@260..261
+#               Integer@260..261 "9"
+#             Whitespace@261..262 " "
+#             Star@262..263 "*"
+#             Whitespace@263..264 " "
+#             IntegerExpr@264..266
+#               Integer@264..266 "10"
+#       Whitespace@266..268 "\n\t"
+#       VarStmt@268..325
+#         VarKw@268..271 "var"
+#         Whitespace@271..272 " "
+#         Ident@272..283 "comparisons"
+#         Whitespace@283..284 " "
+#         Eq@284..285 "="
+#         Whitespace@285..286 " "
+#         BinaryExpr@286..325
+#           BinaryExpr@286..310
+#             BinaryExpr@286..296
+#               IntegerExpr@286..287
+#                 Integer@286..287 "4"
+#               Whitespace@287..288 " "
+#               EqEq@288..290 "=="
+#               Whitespace@290..291 " "
+#               BinaryExpr@291..296
+#                 IntegerExpr@291..292
+#                   Integer@291..292 "2"
+#                 Whitespace@292..293 " "
+#                 Plus@293..294 "+"
+#                 Whitespace@294..295 " "
+#                 IntegerExpr@295..296
+#                   Integer@295..296 "2"
+#             Whitespace@296..297 " "
+#             AndAnd@297..299 "&&"
+#             Whitespace@299..300 " "
+#             BinaryExpr@300..310
+#               IntegerExpr@300..301
+#                 Integer@300..301 "4"
+#               Whitespace@301..302 " "
+#               EqEq@302..304 "=="
+#               Whitespace@304..305 " "
+#               BinaryExpr@305..310
+#                 IntegerExpr@305..306
+#                   Integer@305..306 "2"
+#                 Whitespace@306..307 " "
+#                 Star@307..308 "*"
+#                 Whitespace@308..309 " "
+#                 IntegerExpr@309..310
+#                   Integer@309..310 "2"
+#           Whitespace@310..311 " "
+#           AndAnd@311..313 "&&"
+#           Whitespace@313..314 " "
+#           BinaryExpr@314..325
+#             IntegerExpr@314..315
+#               Integer@314..315 "4"
+#             Whitespace@315..316 " "
+#             EqEq@316..318 "=="
+#             Whitespace@318..319 " "
+#             BinaryExpr@319..325
+#               IntegerExpr@319..320
+#                 Integer@319..320 "1"
+#               Whitespace@320..321 " "
+#               LtLt@321..323 "<<"
+#               Whitespace@323..324 " "
+#               IntegerExpr@324..325
+#                 Integer@324..325 "2"
+#       Whitespace@325..327 "\n\t"
+#       VarStmt@327..356
+#         VarKw@327..330 "var"
+#         Whitespace@330..331 " "
+#         Ident@331..344 "associativity"
+#         Whitespace@344..345 " "
+#         Eq@345..346 "="
+#         Whitespace@346..347 " "
+#         BinaryExpr@347..356
+#           BinaryExpr@347..354
+#             BinaryExpr@347..352
+#               BinaryExpr@347..350
+#                 IntegerExpr@347..348
+#                   Integer@347..348 "1"
+#                 Plus@348..349 "+"
+#                 IntegerExpr@349..350
+#                   Integer@349..350 "2"
+#               Plus@350..351 "+"
+#               IntegerExpr@351..352
+#                 Integer@351..352 "3"
+#             Plus@352..353 "+"
+#             IntegerExpr@353..354
+#               Integer@353..354 "4"
+#           Plus@354..355 "+"
+#           IntegerExpr@355..356
+#             Integer@355..356 "5"
+#       Whitespace@356..357 "\n"
+#       RBrace@357..358 "}"
+#   Whitespace@358..359 "\n"

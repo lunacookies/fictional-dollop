@@ -63,8 +63,59 @@ enum LogosTokenKind {
 	#[token("=")]
 	Eq,
 
+	#[token("==")]
+	EqEq,
+
+	#[token("!=")]
+	BangEq,
+
+	#[token("+")]
+	Plus,
+
+	#[token("-")]
+	Hyphen,
+
 	#[token("*")]
 	Star,
+
+	#[token("/")]
+	Slash,
+
+	#[token("%")]
+	Percent,
+
+	#[token("^")]
+	Caret,
+
+	#[token("<")]
+	Lt,
+
+	#[token(">")]
+	Gt,
+
+	#[token("<=")]
+	LtEq,
+
+	#[token(">=")]
+	GtEq,
+
+	#[token("<<")]
+	LtLt,
+
+	#[token(">>")]
+	GtGt,
+
+	#[token("|")]
+	Pipe,
+
+	#[token("&")]
+	And,
+
+	#[token("||")]
+	PipePipe,
+
+	#[token("&&")]
+	AndAnd,
 
 	#[token(",")]
 	Comma,
@@ -170,12 +221,49 @@ mod tests {
 	#[test]
 	fn symbols() {
 		check(
-			"=*,.",
+			"= == != + - * / % ^ < > <= >= << >> | & || && , .",
 			expect![["
 				Eq@0..1
-				Star@1..2
-				Comma@2..3
-				Dot@3..4"]],
+				Whitespace@1..2
+				EqEq@2..4
+				Whitespace@4..5
+				BangEq@5..7
+				Whitespace@7..8
+				Plus@8..9
+				Whitespace@9..10
+				Hyphen@10..11
+				Whitespace@11..12
+				Star@12..13
+				Whitespace@13..14
+				Slash@14..15
+				Whitespace@15..16
+				Percent@16..17
+				Whitespace@17..18
+				Caret@18..19
+				Whitespace@19..20
+				Lt@20..21
+				Whitespace@21..22
+				Gt@22..23
+				Whitespace@23..24
+				LtEq@24..26
+				Whitespace@26..27
+				GtEq@27..29
+				Whitespace@29..30
+				LtLt@30..32
+				Whitespace@32..33
+				GtGt@33..35
+				Whitespace@35..36
+				Pipe@36..37
+				Whitespace@37..38
+				And@38..39
+				Whitespace@39..40
+				PipePipe@40..42
+				Whitespace@42..43
+				AndAnd@43..45
+				Whitespace@45..46
+				Comma@46..47
+				Whitespace@47..48
+				Dot@48..49"]],
 		);
 	}
 }
