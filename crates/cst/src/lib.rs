@@ -87,6 +87,30 @@ macro_rules! define_token {
 	};
 }
 
+macro_rules! define_compound_token {
+	($name:ident, kinds: [$($kind:ident),+]) => {
+		#[derive(Clone, Copy)]
+		pub enum $name {
+			$( $kind($kind), )+
+		}
+
+		impl CstToken for $name {
+			fn cast(syntax: SyntaxToken, tree: &SyntaxTree) -> Option<Self> {
+				match syntax.kind(tree) {
+					$( TokenKind::$kind => Some(Self::$kind($kind(syntax))), )+
+					_ => None
+				}
+			}
+
+			fn syntax(self) -> SyntaxToken {
+				match self {
+					$( Self::$kind($kind(s)) => s, )+
+				}
+			}
+		}
+	};
+}
+
 define_node!(SourceFile);
 define_compound_node!(Item, kinds: [Strukt, Function]);
 define_node!(Strukt);
@@ -94,7 +118,8 @@ define_node!(Field);
 define_node!(Function);
 define_compound_node!(Stmt, kinds: [VarStmt]);
 define_node!(VarStmt);
-define_compound_node!(Expr, kinds:[BlockExpr, VariableExpr, IntegerExpr]);
+define_compound_node!(Expr, kinds: [BinaryExpr, BlockExpr, VariableExpr, IntegerExpr]);
+define_node!(BinaryExpr);
 define_node!(BlockExpr);
 define_node!(VariableExpr);
 define_node!(IntegerExpr);
@@ -105,6 +130,46 @@ define_node!(PrimitiveTy);
 define_compound_node!(Path, kinds: [ForeignPath, LocalPath]);
 define_node!(ForeignPath);
 define_node!(LocalPath);
+
+define_compound_token!(BinaryOp, kinds: [
+	EqEq,
+	BangEq,
+	Plus,
+	Hyphen,
+	Star,
+	Slash,
+	Percent,
+	Caret,
+	Lt,
+	Gt,
+	LtEq,
+	GtEq,
+	LtLt,
+	GtGt,
+	Pipe,
+	And,
+	PipePipe,
+	AndAnd
+]);
+
+define_token!(EqEq);
+define_token!(BangEq);
+define_token!(Plus);
+define_token!(Hyphen);
+define_token!(Star);
+define_token!(Slash);
+define_token!(Percent);
+define_token!(Caret);
+define_token!(Lt);
+define_token!(Gt);
+define_token!(LtEq);
+define_token!(GtEq);
+define_token!(LtLt);
+define_token!(GtGt);
+define_token!(Pipe);
+define_token!(And);
+define_token!(PipePipe);
+define_token!(AndAnd);
 define_token!(Ident);
 
 impl SourceFile {
@@ -153,6 +218,20 @@ impl VarStmt {
 
 	pub fn value(self, tree: &SyntaxTree) -> Option<Expr> {
 		node(self, tree)
+	}
+}
+
+impl BinaryExpr {
+	pub fn lhs(self, tree: &SyntaxTree) -> Option<Expr> {
+		node(self, tree)
+	}
+
+	pub fn rhs(self, tree: &SyntaxTree) -> Option<Expr> {
+		nodes(self, tree).nth(1)
+	}
+
+	pub fn op(self, tree: &SyntaxTree) -> Option<BinaryOp> {
+		token(self, tree)
 	}
 }
 
