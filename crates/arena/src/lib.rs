@@ -94,6 +94,12 @@ impl<T> Clone for Id<T> {
 
 impl<T> Copy for Id<T> {}
 
+impl<T> PartialEq for Id<T> {
+	fn eq(&self, other: &Self) -> bool {
+		self.idx == other.idx
+	}
+}
+
 impl<T> fmt::Debug for Id<T> {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		write!(f, "Id::<{}>({})", std::any::type_name::<T>(), self.idx)

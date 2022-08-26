@@ -60,6 +60,28 @@ pub enum Expr {
 	Integer(u32),
 	Local(Id<LocalDef>),
 	Block(Vec<Stmt>),
+	Binary { lhs: Id<Expr>, rhs: Id<Expr>, op: BinaryOp },
+}
+
+pub enum BinaryOp {
+	Add,
+	Sub,
+	Mul,
+	Div,
+	Mod,
+	BitAnd,
+	BitOr,
+	BitXor,
+	Shl,
+	Shr,
+	Eq,
+	NEq,
+	Lt,
+	Gt,
+	LtEq,
+	GtEq,
+	And,
+	Or,
 }
 
 pub struct Error {
@@ -69,6 +91,7 @@ pub struct Error {
 
 pub enum ErrorKind {
 	UndefinedVariable,
+	TyMismatch { expected: String, actual: String },
 }
 
 struct LowerCtx<'a> {
@@ -117,11 +140,60 @@ impl LowerCtx<'_> {
 		};
 
 		let (expr, ty) = match expr {
+			cst::Expr::BinaryExpr(binary) => self.binary_expr(binary),
 			cst::Expr::BlockExpr(block) => self.block_expr(block),
 			cst::Expr::VariableExpr(variable) => self.variable_expr(variable),
 			cst::Expr::IntegerExpr(integer) => self.integer_expr(integer),
 		};
 		(self.hir.exprs.alloc(expr), ty)
+	}
+
+	fn binary_expr(&mut self, binary: cst::BinaryExpr) -> (Expr, Id<Ty>) {
+		let lhs_cst = binary.lhs(self.tree);
+		let rhs_cst = binary.rhs(self.tree);
+
+		let (mut lhs, lhs_ty) = self.expr(lhs_cst);
+		let (mut rhs, rhs_ty) = self.expr(rhs_cst);
+
+		let op = match binary.op(self.tree) {
+			Some(op) => op,
+			None => return (Expr::Missing, self.hir.tys.alloc(Ty::Unknown)),
+		};
+
+		let op = match op {
+			cst::BinaryOp::EqEq(_) => BinaryOp::Eq,
+			cst::BinaryOp::BangEq(_) => BinaryOp::NEq,
+			cst::BinaryOp::Plus(_) => BinaryOp::Add,
+			cst::BinaryOp::Hyphen(_) => BinaryOp::Sub,
+			cst::BinaryOp::Star(_) => BinaryOp::Mul,
+			cst::BinaryOp::Slash(_) => BinaryOp::Div,
+			cst::BinaryOp::Percent(_) => BinaryOp::Mod,
+			cst::BinaryOp::Caret(_) => BinaryOp::BitXor,
+			cst::BinaryOp::Lt(_) => BinaryOp::Lt,
+			cst::BinaryOp::Gt(_) => BinaryOp::Gt,
+			cst::BinaryOp::LtEq(_) => BinaryOp::LtEq,
+			cst::BinaryOp::GtEq(_) => BinaryOp::GtEq,
+			cst::BinaryOp::LtLt(_) => BinaryOp::Shl,
+			cst::BinaryOp::GtGt(_) => BinaryOp::Shr,
+			cst::BinaryOp::Pipe(_) => BinaryOp::BitOr,
+			cst::BinaryOp::And(_) => BinaryOp::BitAnd,
+			cst::BinaryOp::PipePipe(_) => BinaryOp::Or,
+			cst::BinaryOp::AndAnd(_) => BinaryOp::And,
+		};
+
+		// operands with a mismatched type are replaced with a ‘missing’ expr
+		if let Some(e) = lhs_cst {
+			if !self.expect_ty_match(&Ty::U32, lhs_ty, e.range(self.tree)) {
+				lhs = self.hir.exprs.alloc(Expr::Missing);
+			}
+		}
+		if let Some(e) = rhs_cst {
+			if !self.expect_ty_match(&Ty::U32, rhs_ty, e.range(self.tree)) {
+				rhs = self.hir.exprs.alloc(Expr::Missing);
+			}
+		}
+
+		(Expr::Binary { lhs, rhs, op }, self.hir.tys.alloc(Ty::U32))
 	}
 
 	fn block_expr(&mut self, block: cst::BlockExpr) -> (Expr, Id<Ty>) {
@@ -163,6 +235,29 @@ impl LowerCtx<'_> {
 		let value = integer.text(self.tree).parse().unwrap();
 		(Expr::Integer(value), self.hir.tys.alloc(Ty::U32))
 	}
+
+	fn expect_ty_match(
+		&mut self,
+		expected: &Ty,
+		actual: Id<Ty>,
+		range: TextRange,
+	) -> bool {
+		let actual = self.hir.tys.get(actual);
+		if expected == actual {
+			return true;
+		}
+		self.errors.push(Error {
+			kind: ErrorKind::TyMismatch {
+				expected: resolved_index::pretty_print_ty(
+					expected,
+					&self.hir.tys,
+				),
+				actual: resolved_index::pretty_print_ty(actual, &self.hir.tys),
+			},
+			range,
+		});
+		false
+	}
 }
 
 pub fn pretty_print(hir: &Hir) -> String {
@@ -203,7 +298,7 @@ impl PrettyPrintCtx<'_> {
 				self.output.push_str(&local_def_id.to_raw().to_string());
 				self.output.push(' ');
 				self.output.push_str(&resolved_index::pretty_print_ty(
-					local_def.ty,
+					self.hir.tys.get(local_def.ty),
 					&self.hir.tys,
 				));
 				self.output.push_str(" = ");
@@ -220,6 +315,35 @@ impl PrettyPrintCtx<'_> {
 				write!(self.output, "l{}", local_def_id.to_raw()).unwrap()
 			}
 			Expr::Block(stmts) => self.block_expr(stmts),
+			Expr::Binary { lhs, rhs, op } => {
+				self.expr(*lhs);
+
+				let op = match op {
+					BinaryOp::Add => "+",
+					BinaryOp::Sub => "-",
+					BinaryOp::Mul => "*",
+					BinaryOp::Div => "/",
+					BinaryOp::Mod => "%",
+					BinaryOp::BitAnd => "&",
+					BinaryOp::BitOr => "|",
+					BinaryOp::BitXor => "^",
+					BinaryOp::Shl => "<<",
+					BinaryOp::Shr => ">>",
+					BinaryOp::Eq => "==",
+					BinaryOp::NEq => "!=",
+					BinaryOp::Lt => "<",
+					BinaryOp::Gt => ">",
+					BinaryOp::LtEq => "<=",
+					BinaryOp::GtEq => ">=",
+					BinaryOp::And => "&&",
+					BinaryOp::Or => "||",
+				};
+				self.output.push(' ');
+				self.output.push_str(op);
+				self.output.push(' ');
+
+				self.expr(*rhs);
+			}
 		}
 	}
 
@@ -315,10 +439,16 @@ fn run_tests() {
 					error.range
 				)
 				.unwrap();
+
 				match error.kind {
 					ErrorKind::UndefinedVariable => {
 						output.push_str("undefined variable")
 					}
+					ErrorKind::TyMismatch { expected, actual } => write!(
+						output,
+						"expected type `{expected}`, found type `{actual}`"
+					)
+					.unwrap(),
 				}
 			}
 		}

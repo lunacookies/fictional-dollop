@@ -1,0 +1,22 @@
+#- main
+fn main() {
+	var x = 1 + 2 + 3
+	var y = x * x / 5 - 10
+	var z = 1 == 2 || 2 == 3
+	var a = {}
+	var b = a + 5
+	var c = a * a
+}
+# ---
+# == main ==
+# main = {
+# 	var l0 u32 = 1 + 2 + 3
+# 	var l1 u32 = l0 * l0 / 5 - 10
+# 	var l2 u32 = 1 == 2 || 2 == 3
+# 	var l3 void = {}
+# 	var l4 u32 = ? + 5
+# 	var l5 u32 = ? * ?
+# }
+# error in main at 102..103: expected type `u32`, found type `void`
+# error in main at 117..118: expected type `u32`, found type `void`
+# error in main at 121..122: expected type `u32`, found type `void`

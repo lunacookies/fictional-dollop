@@ -1,0 +1,28 @@
+#- main
+fn main() {
+	var sum = 2 * 4 + 8
+	var x = {} / 10
+}
+# ---
+# _main_main:
+# 	sub	sp, sp, #64
+# 	str	x30, [sp, #48]
+# 	mov	x8, #2
+# 	str	x8, [sp, #0]
+# 	mov	x8, #4
+# 	str	x8, [sp, #8]
+# 	ldr	x8, [sp, #0]
+# 	ldr	x9, [sp, #8]
+# 	mul	x10, x8, x9
+# 	str	x10, [sp, #16]
+# 	mov	x8, #8
+# 	str	x8, [sp, #24]
+# 	ldr	x8, [sp, #16]
+# 	ldr	x9, [sp, #24]
+# 	add	x10, x8, x9
+# 	str	x10, [sp, #32]
+# 	mov	x8, #10
+# 	str	x8, [sp, #40]
+# 	ldr	x30, [sp, #48]
+# 	add	sp, sp, #64
+# 	ret

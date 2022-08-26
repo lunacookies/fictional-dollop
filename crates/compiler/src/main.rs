@@ -133,6 +133,9 @@ fn lower(
 				hir::ErrorKind::UndefinedVariable => {
 					format!("undefined variable `{}`", &content[error.range])
 				}
+				hir::ErrorKind::TyMismatch { expected, actual } => format!(
+					"expected type `{expected}`, found type `{actual}`"
+				),
 			};
 			let (line, column) =
 				offset_to_line_column(error.range.start(), line_starts);

@@ -1,5 +1,5 @@
 use arena::{ArenaMap, Id};
-use hir::{Expr, Hir, LocalDef, Stmt};
+use hir::{BinaryOp, Expr, Hir, LocalDef, Stmt};
 use std::collections::HashMap;
 use std::fmt::Write;
 
@@ -12,6 +12,24 @@ pub struct Mir {
 pub enum Instr {
 	MovImm { dst: u32, imm: u32 },
 	MovReg { dst: u32, src: u32 },
+	Add { dst: u32, lhs: u32, rhs: u32 },
+	Sub { dst: u32, lhs: u32, rhs: u32 },
+	Mul { dst: u32, lhs: u32, rhs: u32 },
+	Div { dst: u32, lhs: u32, rhs: u32 },
+	Mod { dst: u32, lhs: u32, rhs: u32 },
+	BitAnd { dst: u32, lhs: u32, rhs: u32 },
+	BitOr { dst: u32, lhs: u32, rhs: u32 },
+	Xor { dst: u32, lhs: u32, rhs: u32 },
+	Shl { dst: u32, lhs: u32, rhs: u32 },
+	Shr { dst: u32, lhs: u32, rhs: u32 },
+	Eq { dst: u32, lhs: u32, rhs: u32 },
+	NEq { dst: u32, lhs: u32, rhs: u32 },
+	Lt { dst: u32, lhs: u32, rhs: u32 },
+	Gt { dst: u32, lhs: u32, rhs: u32 },
+	LtEq { dst: u32, lhs: u32, rhs: u32 },
+	GtEq { dst: u32, lhs: u32, rhs: u32 },
+	And { dst: u32, lhs: u32, rhs: u32 },
+	Or { dst: u32, lhs: u32, rhs: u32 },
 }
 
 pub fn build_mir(hir: &Hir) -> Mir {
@@ -83,6 +101,47 @@ impl BuildCtx<'_> {
 				}
 				BuildExprResult::ZeroSized
 			}
+			Expr::Binary { lhs, rhs, op } => {
+				let lhs = match self.expr(*lhs) {
+					BuildExprResult::UsedNewReg(r)
+					| BuildExprResult::ReferenceExistingReg(r) => Some(r),
+					BuildExprResult::ZeroSized => None,
+				};
+				let rhs = match self.expr(*rhs) {
+					BuildExprResult::UsedNewReg(r)
+					| BuildExprResult::ReferenceExistingReg(r) => Some(r),
+					BuildExprResult::ZeroSized => None,
+				};
+
+				let (lhs, rhs) = match (lhs, rhs) {
+					(Some(lhs), Some(rhs)) => (lhs, rhs),
+					_ => return BuildExprResult::ZeroSized,
+				};
+
+				let dst = self.reg();
+				let instr = match *op {
+					BinaryOp::Add => Instr::Add { dst, lhs, rhs },
+					BinaryOp::Sub => Instr::Sub { dst, lhs, rhs },
+					BinaryOp::Mul => Instr::Mul { dst, lhs, rhs },
+					BinaryOp::Div => Instr::Div { dst, lhs, rhs },
+					BinaryOp::Mod => Instr::Mod { dst, lhs, rhs },
+					BinaryOp::BitAnd => Instr::BitAnd { dst, lhs, rhs },
+					BinaryOp::BitOr => Instr::BitOr { dst, lhs, rhs },
+					BinaryOp::BitXor => Instr::Xor { dst, lhs, rhs },
+					BinaryOp::Shl => Instr::Shl { dst, lhs, rhs },
+					BinaryOp::Shr => Instr::Shr { dst, lhs, rhs },
+					BinaryOp::Eq => Instr::Eq { dst, lhs, rhs },
+					BinaryOp::NEq => Instr::NEq { dst, lhs, rhs },
+					BinaryOp::Lt => Instr::Lt { dst, lhs, rhs },
+					BinaryOp::Gt => Instr::Gt { dst, lhs, rhs },
+					BinaryOp::LtEq => Instr::LtEq { dst, lhs, rhs },
+					BinaryOp::GtEq => Instr::GtEq { dst, lhs, rhs },
+					BinaryOp::And => Instr::And { dst, lhs, rhs },
+					BinaryOp::Or => Instr::Or { dst, lhs, rhs },
+				};
+				self.emit(instr);
+				BuildExprResult::UsedNewReg(dst)
+			}
 		}
 	}
 
@@ -142,6 +201,60 @@ impl PrettyPrintCtx<'_> {
 			}
 			Instr::MovReg { dst, src } => {
 				write!(self.output, "mov\tr{dst}, r{src}")
+			}
+			Instr::Add { dst, lhs, rhs } => {
+				write!(self.output, "add\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::Sub { dst, lhs, rhs } => {
+				write!(self.output, "sub\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::Mul { dst, lhs, rhs } => {
+				write!(self.output, "mul\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::Div { dst, lhs, rhs } => {
+				write!(self.output, "div\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::Mod { dst, lhs, rhs } => {
+				write!(self.output, "mod\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::BitAnd { dst, lhs, rhs } => {
+				write!(self.output, "bitand\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::BitOr { dst, lhs, rhs } => {
+				write!(self.output, "bitor\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::Xor { dst, lhs, rhs } => {
+				write!(self.output, "xor\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::Shl { dst, lhs, rhs } => {
+				write!(self.output, "shl\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::Shr { dst, lhs, rhs } => {
+				write!(self.output, "shr\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::Eq { dst, lhs, rhs } => {
+				write!(self.output, "eq\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::NEq { dst, lhs, rhs } => {
+				write!(self.output, "neq\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::Lt { dst, lhs, rhs } => {
+				write!(self.output, "lt\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::Gt { dst, lhs, rhs } => {
+				write!(self.output, "gt\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::LtEq { dst, lhs, rhs } => {
+				write!(self.output, "lteq\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::GtEq { dst, lhs, rhs } => {
+				write!(self.output, "gteq\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::And { dst, lhs, rhs } => {
+				write!(self.output, "and\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::Or { dst, lhs, rhs } => {
+				write!(self.output, "or\tr{dst}, r{lhs}, r{rhs}")
 			}
 		}
 		.unwrap()

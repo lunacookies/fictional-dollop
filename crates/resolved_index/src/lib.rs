@@ -17,6 +17,7 @@ pub enum Item {
 	Function,
 }
 
+#[derive(PartialEq)]
 pub enum Ty {
 	Named(Path),
 	Pointer(Id<Ty>),
@@ -25,7 +26,7 @@ pub enum Ty {
 	Unknown,
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Path {
 	pub module: String,
 	pub item: String,
@@ -273,14 +274,17 @@ impl PrettyPrintStubCtx<'_> {
 	}
 
 	fn ty(&mut self, ty: Id<Ty>) {
-		self.s.push_str(&pretty_print_ty(ty, &self.stub.tys));
+		let pretty = pretty_print_ty(self.stub.tys.get(ty), &self.stub.tys);
+		self.s.push_str(&pretty);
 	}
 }
 
-pub fn pretty_print_ty(ty: Id<Ty>, tys: &Arena<Ty>) -> String {
-	match tys.get(ty) {
+pub fn pretty_print_ty(ty: &Ty, tys: &Arena<Ty>) -> String {
+	match ty {
 		Ty::Named(path) => format!("{}.{}", path.module, path.item),
-		Ty::Pointer(pointee) => format!("*{}", pretty_print_ty(*pointee, tys)),
+		Ty::Pointer(pointee) => {
+			format!("*{}", pretty_print_ty(tys.get(*pointee), tys))
+		}
 		Ty::U32 => "u32".to_string(),
 		Ty::Void => "void".to_string(),
 		Ty::Unknown => "<unknown>".to_string(),

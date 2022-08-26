@@ -60,27 +60,144 @@ impl Ctx<'_> {
 
 	fn instr(&mut self, instr: &Instr, reg_map: &HashMap<u32, u32>) {
 		match *instr {
-			mir::Instr::MovImm { dst, imm } => {
-				self.write_imm_to_scratch(imm);
-				self.store_scratch_to_stack(reg_map[&dst]);
+			Instr::MovImm { dst, imm } => {
+				self.write_imm_to_scratch(imm, 0);
+				self.store_scratch_to_stack(reg_map[&dst], 0);
 			}
-			mir::Instr::MovReg { dst, src } => {
-				self.load_stack_to_scratch(reg_map[&src]);
-				self.store_scratch_to_stack(reg_map[&dst]);
+			Instr::MovReg { dst, src } => {
+				self.load_stack_to_scratch(reg_map[&src], 0);
+				self.store_scratch_to_stack(reg_map[&dst], 0);
+			}
+			Instr::Add { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\tadd\tx10, x8, x9").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::Sub { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\tsub\tx10, x8, x9").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::Mul { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\tmul\tx10, x8, x9").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::Div { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\tudiv\tx10, x8, x9").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::Mod { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\tudiv\tx10, x8, x9").unwrap();
+				write!(self.asm, "\n\tmsub\tx11, x10, x9, x8").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 3);
+			}
+			Instr::BitAnd { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\tand\tx10, x8, x9").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::BitOr { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\torr\tx10, x8, x9").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::Xor { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\teor\tx10, x8, x9").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::Shl { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\tlsl\tx10, x8, x9").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::Shr { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\tlsr\tx10, x8, x9").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::Eq { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\tcmp\tx8, x9").unwrap();
+				write!(self.asm, "\n\tcset\tx10, eq").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::NEq { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\tcmp\tx8, x9").unwrap();
+				write!(self.asm, "\n\tcset\tx10, ne").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::Lt { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\tcmp\tx8, x9").unwrap();
+				write!(self.asm, "\n\tcset\tx10, lo").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::Gt { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\tcmp\tx8, x9").unwrap();
+				write!(self.asm, "\n\tcset\tx10, hi").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::LtEq { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\tcmp\tx8, x9").unwrap();
+				write!(self.asm, "\n\tcset\tx10, ls").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::GtEq { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\tcmp\tx8, x9").unwrap();
+				write!(self.asm, "\n\tcset\tx10, hs").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::And { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\tand\tx10, x8, x9").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
+			}
+			Instr::Or { dst, lhs, rhs } => {
+				self.load_stack_to_scratch(reg_map[&lhs], 0);
+				self.load_stack_to_scratch(reg_map[&rhs], 1);
+				write!(self.asm, "\n\torr\tx10, x8, x9").unwrap();
+				self.store_scratch_to_stack(reg_map[&dst], 2);
 			}
 		}
 	}
 
-	fn load_stack_to_scratch(&mut self, offset: u32) {
-		write!(self.asm, "\n\tldr\tx8, [sp, #{offset}]").unwrap();
+	fn load_stack_to_scratch(&mut self, offset: u32, scratch: u32) {
+		write!(self.asm, "\n\tldr\tx{}, [sp, #{offset}]", scratch + 8)
+			.unwrap();
 	}
 
-	fn store_scratch_to_stack(&mut self, offset: u32) {
-		write!(self.asm, "\n\tstr\tx8, [sp, #{offset}]").unwrap();
+	fn store_scratch_to_stack(&mut self, offset: u32, scratch: u32) {
+		write!(self.asm, "\n\tstr\tx{}, [sp, #{offset}]", 8 + scratch)
+			.unwrap();
 	}
 
-	fn write_imm_to_scratch(&mut self, imm: u32) {
-		write!(self.asm, "\n\tmov\tx8, #{imm}").unwrap();
+	fn write_imm_to_scratch(&mut self, imm: u32, scratch: u32) {
+		write!(self.asm, "\n\tmov\tx{}, #{imm}", 8 + scratch).unwrap();
 	}
 
 	fn sub_stack_pointer(&mut self, offset: u32) {
@@ -111,6 +228,96 @@ fn stack_alloc(instrs: &[Instr]) -> (HashMap<u32, u32>, u32) {
 			Instr::MovReg { dst, src } => {
 				handle_reg(dst);
 				handle_reg(src);
+			}
+			Instr::Add { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::Sub { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::Mul { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::Div { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::Mod { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::BitAnd { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::BitOr { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::Xor { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::Shl { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::Shr { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::Eq { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::NEq { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::Lt { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::Gt { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::LtEq { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::GtEq { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::And { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
+			}
+			Instr::Or { dst, lhs, rhs } => {
+				handle_reg(dst);
+				handle_reg(lhs);
+				handle_reg(rhs);
 			}
 		}
 	}
