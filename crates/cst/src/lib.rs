@@ -242,6 +242,12 @@ impl BlockExpr {
 	}
 }
 
+impl CallExpr {
+	pub fn path(self, tree: &SyntaxTree) -> Option<Path> {
+		node(self, tree)
+	}
+}
+
 impl NamedTy {
 	pub fn path(self, tree: &SyntaxTree) -> Option<Path> {
 		node(self, tree)

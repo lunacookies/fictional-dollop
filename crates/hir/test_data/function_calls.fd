@@ -1,0 +1,30 @@
+#- main
+fn main() {
+	var a = math.docomputation()
+	var x = a()
+	var y = b()
+}
+fn a() {}
+fn b() {}
+
+#- math
+fn docomputation() {
+	var x = 1 + 2
+}
+
+# ---
+# == main ==
+# a = {}
+#
+# b = {}
+#
+# main = {
+# 	var l0 void = math.docomputation()
+# 	var l1 void = main.a()
+# 	var l2 void = main.b()
+# }
+#
+# == math ==
+# docomputation = {
+# 	var l0 u32 = 1 + 2
+# }

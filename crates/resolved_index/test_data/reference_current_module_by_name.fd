@@ -1,0 +1,7 @@
+#- foo
+struct a { x foo.a }
+# ---
+# foo:
+# 	struct a {
+# 		x foo.a,
+# 	}

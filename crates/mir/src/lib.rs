@@ -101,6 +101,7 @@ impl BuildCtx<'_> {
 				}
 				BuildExprResult::ZeroSized
 			}
+			Expr::Call(path) => todo!(),
 			Expr::Binary { lhs, rhs, op } => {
 				let lhs = match self.expr(*lhs) {
 					BuildExprResult::UsedNewReg(r)
@@ -290,9 +291,15 @@ fn run_tests() {
 		}
 
 		let mut hirs = HashMap::new();
-		for (file_name, resolved_stub) in resolved_index.stubs {
-			let (source_file, tree) = &syntax_trees[&file_name];
-			let (hir, _) = hir::lower(&resolved_stub, *source_file, tree);
+		for (file_name, resolved_stub) in &resolved_index.stubs {
+			let (source_file, tree) = &syntax_trees[file_name];
+			let (hir, _) = hir::lower(
+				resolved_stub,
+				file_name,
+				&resolved_index,
+				*source_file,
+				tree,
+			);
 			hirs.insert(file_name.clone(), hir);
 		}
 

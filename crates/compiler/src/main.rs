@@ -124,7 +124,7 @@ fn lower(
 
 	for (name, stub) in &index.stubs {
 		let (source_file, tree) = &parses[name];
-		let (hir, errors) = hir::lower(stub, *source_file, tree);
+		let (hir, errors) = hir::lower(stub, name, index, *source_file, tree);
 		hirs.insert(name.clone(), hir);
 
 		let (content, line_starts) = &files[name];
@@ -132,6 +132,18 @@ fn lower(
 			let message = match error.kind {
 				hir::ErrorKind::UndefinedVariable => {
 					format!("undefined variable `{}`", &content[error.range])
+				}
+				hir::ErrorKind::UndefinedModule => {
+					format!("undefined module `{}`", &content[error.range])
+				}
+				hir::ErrorKind::UndefinedItem => {
+					format!("undefined item `{}`", &content[error.range])
+				}
+				hir::ErrorKind::ExpectedFunctionFoundTy => {
+					format!(
+						"expected function, found type `{}`",
+						&content[error.range]
+					)
 				}
 				hir::ErrorKind::TyMismatch { expected, actual } => format!(
 					"expected type `{expected}`, found type `{actual}`"

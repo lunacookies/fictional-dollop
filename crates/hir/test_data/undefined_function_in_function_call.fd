@@ -1,0 +1,20 @@
+#- main
+fn main() {
+	var a = x.bar()
+	var b = foo()
+}
+
+#- x
+fn foo() {}
+
+# ---
+# == main ==
+# main = {
+# 	var l0 void = ?
+# 	var l1 void = ?
+# }
+#
+# == x ==
+# foo = {}
+# error in main at 23..26: undefined item
+# error in main at 38..41: undefined item

@@ -1,0 +1,21 @@
+#- main
+struct x {}
+fn main() {
+	var a = x()
+	var b = foo.y()
+}
+
+#- foo
+struct y{}
+
+# ---
+# == foo ==
+#
+#
+# == main ==
+# main = {
+# 	var l0 void = ?
+# 	var l1 void = ?
+# }
+# error in main at 33..34: expected function, found type
+# error in main at 46..51: expected function, found type

@@ -1,6 +1,6 @@
 use arena::{Arena, Id};
 use cst::{CstNode, CstToken};
-use resolved_index::{Stub, Ty};
+use resolved_index::{Index, Item, Path, Stub, Ty};
 use std::collections::HashMap;
 use std::fmt::Write;
 use syntax::SyntaxTree;
@@ -8,11 +8,15 @@ use text_size::TextRange;
 
 pub fn lower(
 	stub: &Stub,
+	stub_name: &str,
+	index: &Index,
 	source_file: cst::SourceFile,
 	tree: &SyntaxTree,
 ) -> (Hir, Vec<Error>) {
 	let mut ctx = LowerCtx {
 		stub,
+		stub_name,
+		index,
 		tree,
 		hir: Hir::default(),
 		scopes: Vec::new(),
@@ -60,6 +64,7 @@ pub enum Expr {
 	Integer(u32),
 	Local(Id<LocalDef>),
 	Block(Vec<Stmt>),
+	Call(Path),
 	Binary { lhs: Id<Expr>, rhs: Id<Expr>, op: BinaryOp },
 }
 
@@ -91,11 +96,16 @@ pub struct Error {
 
 pub enum ErrorKind {
 	UndefinedVariable,
+	UndefinedModule,
+	UndefinedItem,
+	ExpectedFunctionFoundTy,
 	TyMismatch { expected: String, actual: String },
 }
 
 struct LowerCtx<'a> {
 	stub: &'a Stub,
+	stub_name: &'a str,
+	index: &'a Index,
 	tree: &'a SyntaxTree,
 	hir: Hir,
 	scopes: Vec<HashMap<String, Id<LocalDef>>>,
@@ -142,7 +152,7 @@ impl LowerCtx<'_> {
 		let (expr, ty) = match expr {
 			cst::Expr::BinaryExpr(binary) => self.binary_expr(binary),
 			cst::Expr::BlockExpr(block) => self.block_expr(block),
-			cst::Expr::CallExpr(_) => todo!(),
+			cst::Expr::CallExpr(call) => self.call_expr(call),
 			cst::Expr::VariableExpr(variable) => self.variable_expr(variable),
 			cst::Expr::IntegerExpr(integer) => self.integer_expr(integer),
 		};
@@ -207,6 +217,26 @@ impl LowerCtx<'_> {
 		(Expr::Block(stmts), self.hir.tys.alloc(Ty::Void))
 	}
 
+	fn call_expr(&mut self, call: cst::CallExpr) -> (Expr, Id<Ty>) {
+		let path_cst = match call.path(self.tree) {
+			Some(p) => p,
+			None => return (Expr::Missing, self.hir.tys.alloc(Ty::Void)),
+		};
+
+		let path = match self.path(path_cst) {
+			Some((p, Item::Function { .. })) => p,
+			Some((_, Item::Strukt { .. })) => {
+				self.errors.push(Error {
+					kind: ErrorKind::ExpectedFunctionFoundTy,
+					range: path_cst.range(self.tree),
+				});
+				return (Expr::Missing, self.hir.tys.alloc(Ty::Void));
+			}
+			None => return (Expr::Missing, self.hir.tys.alloc(Ty::Void)),
+		};
+		(Expr::Call(path), self.hir.tys.alloc(Ty::Void))
+	}
+
 	fn variable_expr(
 		&mut self,
 		variable: cst::VariableExpr,
@@ -235,6 +265,73 @@ impl LowerCtx<'_> {
 	fn integer_expr(&mut self, integer: cst::IntegerExpr) -> (Expr, Id<Ty>) {
 		let value = integer.text(self.tree).parse().unwrap();
 		(Expr::Integer(value), self.hir.tys.alloc(Ty::U32))
+	}
+
+	fn path(&mut self, path: cst::Path) -> Option<(Path, &Item)> {
+		match path {
+			cst::Path::ForeignPath(p) => self.foreign_path(p),
+			cst::Path::LocalPath(p) => self.local_path(p),
+		}
+	}
+
+	fn foreign_path(
+		&mut self,
+		path: cst::ForeignPath,
+	) -> Option<(Path, &Item)> {
+		let module = path.module_name(self.tree)?;
+		let module_text = module.text(self.tree);
+
+		let module_stub = match self.index.stubs.get(module_text) {
+			Some(module_stub) => module_stub,
+			None => {
+				self.errors.push(Error {
+					kind: ErrorKind::UndefinedModule,
+					range: module.range(self.tree),
+				});
+				return None;
+			}
+		};
+
+		let item = path.item_name(self.tree)?;
+		let item_text = item.text(self.tree);
+		match module_stub.items.get(item_text) {
+			Some(item) => {
+				let path = Path {
+					module: module_text.to_string(),
+					item: item_text.to_string(),
+				};
+				Some((path, item))
+			}
+			None => {
+				self.errors.push(Error {
+					kind: ErrorKind::UndefinedItem,
+					range: item.range(self.tree),
+				});
+				None
+			}
+		}
+	}
+
+	fn local_path(&mut self, path: cst::LocalPath) -> Option<(Path, &Item)> {
+		let item = path.item_name(self.tree)?;
+		let item_text = item.text(self.tree);
+
+		match self.stub.items.get(item_text) {
+			Some(item) => {
+				let path = Path {
+					module: self.stub_name.to_string(),
+					item: item_text.to_string(),
+				};
+				Some((path, item))
+			}
+			None => {
+				self.errors.push(Error {
+					kind: ErrorKind::UndefinedItem,
+					range: item.range(self.tree),
+				});
+				None
+			}
+		}
 	}
 
 	fn expect_ty_match(
@@ -316,6 +413,9 @@ impl PrettyPrintCtx<'_> {
 				write!(self.output, "l{}", local_def_id.to_raw()).unwrap()
 			}
 			Expr::Block(stmts) => self.block_expr(stmts),
+			Expr::Call(path) => {
+				write!(self.output, "{}.{}()", path.module, path.item).unwrap()
+			}
 			Expr::Binary { lhs, rhs, op } => {
 				self.expr(*lhs);
 
@@ -394,8 +494,7 @@ fn run_tests() {
 			raw_index.stubs.insert(file_name.to_string(), stub);
 		}
 
-		let mut resolved_index =
-			resolved_index::Index { stubs: HashMap::new() };
+		let mut resolved_index = Index { stubs: HashMap::new() };
 		for (file_name, raw_stub) in &raw_index.stubs {
 			let (resolved_stub, _) = resolved_index::resolve_raw_stub(
 				raw_stub, file_name, &raw_index,
@@ -407,7 +506,13 @@ fn run_tests() {
 		let mut errors = HashMap::new();
 		for (file_name, resolved_stub) in &resolved_index.stubs {
 			let (source_file, tree) = &syntax_trees[file_name];
-			let (hir, e) = lower(resolved_stub, *source_file, tree);
+			let (hir, e) = lower(
+				resolved_stub,
+				file_name,
+				&resolved_index,
+				*source_file,
+				tree,
+			);
 			hirs.insert(file_name, hir);
 			errors.insert(file_name, e);
 		}
@@ -444,6 +549,15 @@ fn run_tests() {
 				match error.kind {
 					ErrorKind::UndefinedVariable => {
 						output.push_str("undefined variable")
+					}
+					ErrorKind::UndefinedModule => {
+						output.push_str("undefined module")
+					}
+					ErrorKind::UndefinedItem => {
+						output.push_str("undefined item")
+					}
+					ErrorKind::ExpectedFunctionFoundTy => {
+						output.push_str("expected function, found type")
 					}
 					ErrorKind::TyMismatch { expected, actual } => write!(
 						output,

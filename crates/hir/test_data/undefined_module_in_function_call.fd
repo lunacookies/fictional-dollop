@@ -1,0 +1,10 @@
+#- main
+fn main() {
+	var a = foo.bar()
+}
+# ---
+# == main ==
+# main = {
+# 	var l0 void = ?
+# }
+# error in main at 21..24: undefined module
