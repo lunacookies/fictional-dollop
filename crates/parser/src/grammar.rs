@@ -122,6 +122,12 @@ fn lhs(p: &mut Parser) -> Option<usize> {
 			p.bump(TokenKind::Integer);
 			p.finish_node();
 		}
+		Some(TokenKind::Ident)
+			if p.lookahead() == Some(TokenKind::LParen)
+				|| p.lookahead() == Some(TokenKind::Dot) =>
+		{
+			call(p)
+		}
 		Some(TokenKind::Ident) => {
 			p.start_node(NodeKind::VariableExpr);
 			p.bump(TokenKind::Ident);
@@ -146,6 +152,14 @@ fn block(p: &mut Parser) {
 	}
 
 	p.expect(TokenKind::RBrace);
+	p.finish_node();
+}
+
+fn call(p: &mut Parser) {
+	p.start_node(NodeKind::CallExpr);
+	path(p);
+	p.bump(TokenKind::LParen);
+	p.expect(TokenKind::RParen);
 	p.finish_node();
 }
 

@@ -1,0 +1,55 @@
+fn main() {
+	var a = foo()
+	var b = bar() + something.baz()
+}
+# ---
+# SourceFile@0..62
+#   Function@0..61
+#     FnKw@0..2 "fn"
+#     Whitespace@2..3 " "
+#     Ident@3..7 "main"
+#     LParen@7..8 "("
+#     RParen@8..9 ")"
+#     Whitespace@9..10 " "
+#     BlockExpr@10..61
+#       LBrace@10..11 "{"
+#       Whitespace@11..13 "\n\t"
+#       VarStmt@13..26
+#         VarKw@13..16 "var"
+#         Whitespace@16..17 " "
+#         Ident@17..18 "a"
+#         Whitespace@18..19 " "
+#         Eq@19..20 "="
+#         Whitespace@20..21 " "
+#         CallExpr@21..26
+#           LocalPath@21..24
+#             Ident@21..24 "foo"
+#           LParen@24..25 "("
+#           RParen@25..26 ")"
+#       Whitespace@26..28 "\n\t"
+#       VarStmt@28..59
+#         VarKw@28..31 "var"
+#         Whitespace@31..32 " "
+#         Ident@32..33 "b"
+#         Whitespace@33..34 " "
+#         Eq@34..35 "="
+#         Whitespace@35..36 " "
+#         BinaryExpr@36..59
+#           CallExpr@36..41
+#             LocalPath@36..39
+#               Ident@36..39 "bar"
+#             LParen@39..40 "("
+#             RParen@40..41 ")"
+#           Whitespace@41..42 " "
+#           Plus@42..43 "+"
+#           Whitespace@43..44 " "
+#           CallExpr@44..59
+#             ForeignPath@44..57
+#               Ident@44..53 "something"
+#               Dot@53..54 "."
+#               Ident@54..57 "baz"
+#             LParen@57..58 "("
+#             RParen@58..59 ")"
+#       Whitespace@59..60 "\n"
+#       RBrace@60..61 "}"
+#   Whitespace@61..62 "\n"

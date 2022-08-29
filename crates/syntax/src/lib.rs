@@ -16,6 +16,7 @@ pub enum NodeKind {
 	VarStmt,
 	BinaryExpr,
 	BlockExpr,
+	CallExpr,
 	VariableExpr,
 	IntegerExpr,
 	NamedTy,

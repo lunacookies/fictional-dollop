@@ -142,6 +142,7 @@ impl LowerCtx<'_> {
 		let (expr, ty) = match expr {
 			cst::Expr::BinaryExpr(binary) => self.binary_expr(binary),
 			cst::Expr::BlockExpr(block) => self.block_expr(block),
+			cst::Expr::CallExpr(_) => todo!(),
 			cst::Expr::VariableExpr(variable) => self.variable_expr(variable),
 			cst::Expr::IntegerExpr(integer) => self.integer_expr(integer),
 		};
