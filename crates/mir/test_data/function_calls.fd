@@ -1,0 +1,19 @@
+#- main
+fn main() {
+	var x = foo.bar()
+	var y = baz()
+	var z = abcdef()
+}
+fn baz() {}
+
+#- foo
+fn bar() {}
+
+# ---
+# == foo ==
+# bar:
+# == main ==
+# baz:
+# main:
+# 	call	foo.bar
+# 	call	main.baz

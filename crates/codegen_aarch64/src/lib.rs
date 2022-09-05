@@ -59,9 +59,9 @@ impl Ctx<'_> {
 	}
 
 	fn instr(&mut self, instr: &Instr, reg_map: &HashMap<u32, u32>) {
-		match *instr {
+		match instr {
 			Instr::MovImm { dst, imm } => {
-				self.write_imm_to_scratch(imm, 0);
+				self.write_imm_to_scratch(*imm, 0);
 				self.store_scratch_to_stack(reg_map[&dst], 0);
 			}
 			Instr::MovReg { dst, src } => {
@@ -183,6 +183,10 @@ impl Ctx<'_> {
 				write!(self.asm, "\n\torr\tx10, x8, x9").unwrap();
 				self.store_scratch_to_stack(reg_map[&dst], 2);
 			}
+			Instr::Call { path } => {
+				write!(self.asm, "\n\tbl\t_{}_{}", path.module, path.item)
+					.unwrap();
+			}
 		}
 	}
 
@@ -223,102 +227,103 @@ fn stack_alloc(instrs: &[Instr]) -> (HashMap<u32, u32>, u32) {
 	};
 
 	for instr in instrs {
-		match *instr {
-			Instr::MovImm { dst, imm: _ } => handle_reg(dst),
+		match instr {
+			Instr::MovImm { dst, imm: _ } => handle_reg(*dst),
 			Instr::MovReg { dst, src } => {
-				handle_reg(dst);
-				handle_reg(src);
+				handle_reg(*dst);
+				handle_reg(*src);
 			}
 			Instr::Add { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::Sub { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::Mul { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::Div { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::Mod { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::BitAnd { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::BitOr { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::Xor { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::Shl { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::Shr { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::Eq { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::NEq { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::Lt { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::Gt { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::LtEq { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::GtEq { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::And { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
 			Instr::Or { dst, lhs, rhs } => {
-				handle_reg(dst);
-				handle_reg(lhs);
-				handle_reg(rhs);
+				handle_reg(*dst);
+				handle_reg(*lhs);
+				handle_reg(*rhs);
 			}
+			Instr::Call { path } => {}
 		}
 	}
 

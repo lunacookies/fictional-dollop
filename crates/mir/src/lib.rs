@@ -8,7 +8,7 @@ pub struct Mir {
 	pub instrs: Vec<Instr>,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub enum Instr {
 	MovImm { dst: u32, imm: u32 },
 	MovReg { dst: u32, src: u32 },
@@ -30,6 +30,7 @@ pub enum Instr {
 	GtEq { dst: u32, lhs: u32, rhs: u32 },
 	And { dst: u32, lhs: u32, rhs: u32 },
 	Or { dst: u32, lhs: u32, rhs: u32 },
+	Call { path: resolved_index::Path },
 }
 
 pub fn build_mir(hir: &Hir) -> Mir {
@@ -101,7 +102,10 @@ impl BuildCtx<'_> {
 				}
 				BuildExprResult::ZeroSized
 			}
-			Expr::Call(path) => todo!(),
+			Expr::Call(path) => {
+				self.emit(Instr::Call { path: path.clone() });
+				BuildExprResult::ZeroSized
+			}
 			Expr::Binary { lhs, rhs, op } => {
 				let lhs = match self.expr(*lhs) {
 					BuildExprResult::UsedNewReg(r)
@@ -191,11 +195,11 @@ impl PrettyPrintCtx<'_> {
 
 		for i in range.0..range.1 {
 			self.output.push_str("\n\t");
-			self.instr(self.mir.instrs[i as usize]);
+			self.instr(&self.mir.instrs[i as usize]);
 		}
 	}
 
-	fn instr(&mut self, instr: Instr) {
+	fn instr(&mut self, instr: &Instr) {
 		match instr {
 			Instr::MovImm { dst, imm } => {
 				write!(self.output, "mov\tr{dst}, {imm}")
@@ -256,6 +260,9 @@ impl PrettyPrintCtx<'_> {
 			}
 			Instr::Or { dst, lhs, rhs } => {
 				write!(self.output, "or\tr{dst}, r{lhs}, r{rhs}")
+			}
+			Instr::Call { path } => {
+				write!(self.output, "call\t{}.{}", path.module, path.item)
 			}
 		}
 		.unwrap()

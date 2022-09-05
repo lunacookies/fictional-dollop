@@ -1,0 +1,33 @@
+#- main
+fn main() {
+	var x = foo()
+	var y = non_existent()
+	var y = other.f()
+}
+
+fn foo() {}
+
+#- other
+fn f() {}
+
+# ---
+# _main_foo:
+# 	sub	sp, sp, #16
+# 	str	x30, [sp, #0]
+# 	ldr	x30, [sp, #0]
+# 	add	sp, sp, #16
+# 	ret
+# _main_main:
+# 	sub	sp, sp, #16
+# 	str	x30, [sp, #0]
+# 	bl	_main_foo
+# 	bl	_other_f
+# 	ldr	x30, [sp, #0]
+# 	add	sp, sp, #16
+# 	ret
+# _other_f:
+# 	sub	sp, sp, #16
+# 	str	x30, [sp, #0]
+# 	ldr	x30, [sp, #0]
+# 	add	sp, sp, #16
+# 	ret
